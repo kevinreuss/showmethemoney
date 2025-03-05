@@ -380,7 +380,11 @@
 
           // Calculate number of bills
           const numBills = amount / 100;
-          this.infoElement.textContent = `${numBills} x 100$ bill`;
+
+          // Format numbers with thousand separators
+          const formattedNumBills = numBills.toLocaleString();
+          const formattedAmount = amount.toLocaleString();
+          this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount}`;
 
           if (numBills <= 0) return;
 
@@ -480,7 +484,7 @@
           }
 
           // Update info with stack count
-          this.infoElement.textContent = `${numBills} x 100$ bill (${stacksCreated} stacks created)`;
+          this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount} (${stacksCreated.toLocaleString()} stacks created)`;
         },
 
         // Create a visual stack of bills without physics - optimized version
