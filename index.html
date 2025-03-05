@@ -403,13 +403,44 @@
             );
           }
 
-          // Bill dimensions
+          // Create shared geometry and materials for all stacks
+          // This is a major optimization - we only create these once
           const billWidth = 1.56;
           const billHeight = 0.663;
           const billThickness = 0.0011;
+          const stackHeight = billThickness * billsPerStack;
+
+          // Create shared geometry
+          this.sharedStackGeometry = new THREE.BoxGeometry(
+            billWidth,
+            stackHeight,
+            billHeight
+          );
+
+          // Create shared materials
+          this.sharedTopMaterial = new THREE.MeshStandardMaterial({
+            map: this.billTexture,
+            roughness: 0.5,
+            metalness: 0.1,
+          });
+
+          this.sharedSideMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcccccc,
+            roughness: 0.5,
+            metalness: 0.1,
+          });
+
+          // Create shared materials array
+          this.sharedMaterials = [
+            this.sharedSideMaterial, // right side (index 0)
+            this.sharedSideMaterial, // left side (index 1)
+            this.sharedTopMaterial, // top face with texture (index 2)
+            this.sharedSideMaterial, // bottom face (index 3)
+            this.sharedSideMaterial, // front edge (index 4)
+            this.sharedSideMaterial, // back edge (index 5)
+          ];
 
           // Calculate optimal grid dimensions
-          const stackHeight = billThickness * billsPerStack;
           const totalVolume = numStacks * billWidth * billHeight * stackHeight;
           const targetWidth = Math.pow(totalVolume * 1.5, 1 / 3);
 
@@ -508,46 +539,20 @@
           // Calculate stack height
           const stackHeight = billThickness * numBills;
 
-          // Create main stack geometry (one big box instead of individual bills)
-          const stackGeometry = new THREE.BoxGeometry(
-            billWidth,
-            stackHeight,
-            billHeight
+          // Use the shared geometry and materials created in renderBills
+          // This is much more efficient than creating new ones for each stack
+          const stackMesh = new THREE.Mesh(
+            this.sharedStackGeometry,
+            this.sharedMaterials
           );
 
-          // Create materials array with only 2 materials instead of 6
-          // Material 0: Used for all sides and bottom (5 faces)
-          // Material 1: Used for top face with texture (1 face)
-
-          // Top face with bill texture (index 2 in BoxGeometry)
-          const topMaterial = new THREE.MeshStandardMaterial({
-            map: this.billTexture,
-            roughness: 0.5,
-            metalness: 0.1,
-          });
-
-          // Single material for all other faces
-          const sideMaterial = new THREE.MeshStandardMaterial({
-            color: 0xcccccc,
-            roughness: 0.5,
-            metalness: 0.1,
-          });
-
-          // Create materials array with specific assignment to faces
-          const materials = [
-            sideMaterial, // right side (index 0)
-            sideMaterial, // left side (index 1)
-            topMaterial, // top face with texture (index 2)
-            sideMaterial, // bottom face (index 3)
-            sideMaterial, // front edge (index 4)
-            sideMaterial, // back edge (index 5)
-          ];
-
-          const stackMesh = new THREE.Mesh(stackGeometry, materials);
+          // Scale the mesh to match the actual stack height
+          // This allows us to use the same geometry for stacks of different heights
+          const standardStackHeight = billThickness * 100; // Height for 100 bills
+          const scaleY = stackHeight / standardStackHeight;
+          stackMesh.scale.y = scaleY;
 
           // Determine if we should use detailed shadows based on number of stacks
-          const billsPerStack = 100;
-          const numStacks = Math.ceil(numBills / billsPerStack);
           const useDetailedShadows = this.bills.length < 1000; // Only use detailed shadows for fewer than 1000 stacks
 
           stackMesh.castShadow = useDetailedShadows;
