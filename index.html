@@ -413,7 +413,10 @@
           const aspectRatio = billWidth / billHeight;
 
           // Calculate grid dimensions (columns and rows)
-          let gridX = Math.ceil(Math.sqrt(numStacks * aspectRatio));
+          // Since bills are wider than deep (billWidth > billHeight),
+          // we should have fewer stacks along X-axis than Z-axis to make the overall footprint more square
+          const targetRatio = Math.sqrt(aspectRatio);
+          let gridX = Math.ceil(Math.sqrt(numStacks / targetRatio));
           let gridZ = Math.ceil(numStacks / gridX);
 
           // Calculate how many layers we need to achieve the target height
@@ -424,7 +427,7 @@
           // Recalculate grid dimensions with layers
           if (layersNeeded > 1) {
             const stacksPerLayer = Math.ceil(numStacks / layersNeeded);
-            gridX = Math.ceil(Math.sqrt(stacksPerLayer * aspectRatio));
+            gridX = Math.ceil(Math.sqrt(stacksPerLayer / targetRatio));
             gridZ = Math.ceil(stacksPerLayer / gridX);
           }
 
