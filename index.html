@@ -388,6 +388,14 @@
 
           if (numBills <= 0) return;
 
+          // Check if we should use textures (disable for amounts >= 1 billion)
+          const useTextures = amount < 1000000000;
+          if (!useTextures) {
+            console.log(
+              "Amount exceeds 1 billion dollars - disabling textures for better performance"
+            );
+          }
+
           // Bill dimensions
           const billWidth = 1.56;
           const billHeight = 0.663;
@@ -478,7 +486,8 @@
               position.x,
               position.y,
               position.z,
-              position.bills
+              position.bills,
+              useTextures
             );
             stacksCreated++;
           }
@@ -488,7 +497,7 @@
         },
 
         // Create a visual stack of bills without physics - optimized version
-        createVisualStack(x, y, z, numBills) {
+        createVisualStack(x, y, z, numBills, useTextures = true) {
           const billWidth = 1.56;
           const billHeight = 0.663;
           const billThickness = 0.0011;
@@ -508,7 +517,7 @@
             billHeight
           );
 
-          // Use simple materials without textures for better performance
+          // Always use textured material for the top face
           const frontMaterial = new THREE.MeshStandardMaterial({
             map: this.billTexture,
             roughness: 0.5,
@@ -521,7 +530,7 @@
             metalness: 0.2,
           });
 
-          // Simple edge material without lines
+          // Simple edge material without lines for large amounts
           const edgeMaterial = new THREE.MeshStandardMaterial({
             color: 0xcccccc,
             roughness: 0.5,
@@ -546,12 +555,10 @@
 
           stackGroup.add(stackMesh);
 
-          // Only add top bill for smaller stacks to improve performance
-          if (numBills > 0 && numBills < 50) {
-            const topBill = this.billMesh.clone();
-            topBill.position.y = stackHeight + billThickness / 2;
-            stackGroup.add(topBill);
-          }
+          // Always add top bill regardless of amount
+          const topBill = this.billMesh.clone();
+          topBill.position.y = stackHeight + billThickness / 2;
+          stackGroup.add(topBill);
 
           // Store reference to the stack
           this.bills.push({
