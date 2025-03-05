@@ -426,40 +426,66 @@
           const stacksPerLayer = gridX * gridZ;
           const numLayers = Math.ceil(numStacks / stacksPerLayer);
 
-          // Pre-calculate all stack positions and bill counts
-          const stacks = [];
+          // Create a map to store bills at each grid position
+          const gridPositions = new Map();
           let remainingBills = numBills;
 
+          // Distribute bills to grid positions
           for (let layer = 0; layer < numLayers; layer++) {
             for (let row = 0; row < gridZ; row++) {
               for (let col = 0; col < gridX; col++) {
                 if (remainingBills <= 0) break;
 
-                // Calculate position
-                let offsetX = (col - (gridX - 1) / 2) * spacingX;
-                let offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
-                let offsetY = layer * stackHeight;
+                // Calculate position key
+                const posKey = `${layer},${row},${col}`;
 
                 // Calculate bills in this stack
                 const stackBills = Math.min(billsPerStack, remainingBills);
                 remainingBills -= stackBills;
 
-                stacks.push({
-                  x: offsetX,
-                  y: offsetY,
-                  z: offsetZ,
-                  bills: stackBills,
-                });
+                // Add to existing position or create new entry
+                if (gridPositions.has(posKey)) {
+                  gridPositions.get(posKey).bills += stackBills;
+                } else {
+                  // Calculate position
+                  const offsetX = (col - (gridX - 1) / 2) * spacingX;
+                  const offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
+                  const offsetY = layer * stackHeight;
+
+                  gridPositions.set(posKey, {
+                    x: offsetX,
+                    y: offsetY,
+                    z: offsetZ,
+                    bills: stackBills,
+                  });
+                }
               }
               if (remainingBills <= 0) break;
             }
             if (remainingBills <= 0) break;
           }
 
-          // Create all stacks at once
-          for (const stack of stacks) {
-            this.createVisualStack(stack.x, stack.y, stack.z, stack.bills);
+          // Log statistics
+          console.log(`Total bills: ${numBills}`);
+          console.log(
+            `Theoretical 10k stacks: ${Math.ceil(numBills / billsPerStack)}`
+          );
+          console.log(`Actual stacks created: ${gridPositions.size}`);
+
+          // Create stacks for each grid position
+          let stacksCreated = 0;
+          for (const [_, position] of gridPositions) {
+            this.createVisualStack(
+              position.x,
+              position.y,
+              position.z,
+              position.bills
+            );
+            stacksCreated++;
           }
+
+          // Update info with stack count
+          this.infoElement.textContent = `${numBills} x 100$ bill (${stacksCreated} stacks created)`;
         },
 
         // Create a visual stack of bills without physics - optimized version
