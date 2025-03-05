@@ -231,26 +231,12 @@
             // Add onLoad callback to handle texture loading
             () => {
               console.log("Texture loaded successfully");
-              // Force material update
-              if (Array.isArray(this.billMesh.material)) {
-                this.billMesh.material.forEach((mat) => {
-                  if (mat.map) mat.needsUpdate = true;
-                });
-              }
             },
             // Add onProgress callback (optional)
             undefined,
             // Add onError callback
             (err) => {
               console.error("Error loading texture:", err);
-              // Fallback to a green color if texture fails
-              if (Array.isArray(this.billMesh.material)) {
-                this.billMesh.material[2] = new THREE.MeshStandardMaterial({
-                  color: 0x85bb65,
-                  roughness: 0.5,
-                  metalness: 0.1,
-                });
-              }
             }
           );
 
@@ -403,8 +389,8 @@
           const numStacks = Math.ceil(amount / stackValue);
 
           // Maximum grid size: can be different for X and Y
-          const maxGridSizeX = 3; // Maximum columns
-          const maxGridSizeY = 5; // Maximum rows
+          const maxGridSizeX = 5; // Maximum columns
+          const maxGridSizeY = 10; // Maximum rows
 
           // Base spacing on bill dimensions for a consistent look
           let spacingX = billWidth * 1.15; // Horizontal spacing with small gap
@@ -449,40 +435,69 @@
           }
         },
 
-        // Create a visual stack of bills without physics
+        // Create a visual stack of bills without physics - optimized version
         createVisualStack(x, y, z, numBills) {
           const billWidth = 1.56;
           const billHeight = 0.663;
           const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
 
-          // Create a group to hold all bills in this stack
+          // Calculate stack height
+          const stackHeight = billThickness * numBills;
+
+          // Create a group to hold the stack
           const stackGroup = new THREE.Group();
           stackGroup.position.set(x, y, z);
           this.scene.add(stackGroup);
 
-          // Add individual bill meshes to the stack with slight offset for visibility
-          for (let i = 0; i < numBills; i++) {
-            const bill = this.billMesh.clone();
+          // Create main stack geometry (one big box instead of individual bills)
+          const stackGeometry = new THREE.BoxGeometry(
+            billWidth,
+            stackHeight,
+            billHeight
+          );
 
-            // Position each bill with a very slight offset for better visibility
-            // This creates a small "stair-step" effect to see individual bills
-            const offsetX = (Math.random() - 0.5) * 0.01; // Tiny random X offset
-            const offsetZ = (Math.random() - 0.5) * 0.01; // Tiny random Z offset
+          // Create materials for the stack
+          const frontMaterial = new THREE.MeshStandardMaterial({
+            map: this.billTexture,
+            roughness: 0.5,
+            metalness: 0.1,
+          });
 
-            bill.position.set(
-              offsetX,
-              billThickness * i + billThickness / 2,
-              offsetZ
-            );
+          const backMaterial = new THREE.MeshStandardMaterial({
+            color: 0x85bb65,
+            roughness: 0.5,
+            metalness: 0.2,
+          });
 
-            // Very slight random rotation for realism
-            bill.rotation.set(
-              0,
-              (Math.random() - 0.5) * 0.02, // Tiny random Y rotation
-              0
-            );
+          // Create side materials with lines to represent individual bills
+          const edgeMaterial = this.createEdgeMaterialWithLines(
+            numBills,
+            billThickness
+          );
 
-            stackGroup.add(bill);
+          const materials = [
+            edgeMaterial, // right side
+            edgeMaterial, // left side
+            frontMaterial, // top (front of bill)
+            backMaterial, // bottom (back of bill)
+            edgeMaterial, // front edge
+            edgeMaterial, // back edge
+          ];
+
+          const stackMesh = new THREE.Mesh(stackGeometry, materials);
+          stackMesh.castShadow = true;
+          stackMesh.receiveShadow = true;
+
+          // Position the stack so its bottom is at y=0
+          stackMesh.position.y = stackHeight / 2;
+
+          stackGroup.add(stackMesh);
+
+          // Add a single bill on top for better visibility
+          if (numBills > 0) {
+            const topBill = this.billMesh.clone();
+            topBill.position.y = stackHeight + billThickness / 2;
+            stackGroup.add(topBill);
           }
 
           // Store reference to the stack
@@ -490,6 +505,48 @@
             mesh: stackGroup,
             billCount: numBills,
             isVisualStack: true,
+          });
+        },
+
+        // Create a material with lines to represent individual bills
+        createEdgeMaterialWithLines(numBills, billThickness) {
+          // Create a canvas to draw the lines
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+
+          // Set canvas size (height represents the stack height)
+          canvas.width = 256;
+          canvas.height = 1024;
+
+          // Fill with base color
+          context.fillStyle = "#cccccc";
+          context.fillRect(0, 0, canvas.width, canvas.height);
+
+          // Draw horizontal lines for each bill
+          context.strokeStyle = "#999999";
+          context.lineWidth = 1;
+
+          const lineSpacing = canvas.height / numBills;
+
+          for (let i = 0; i < numBills; i++) {
+            const y = i * lineSpacing;
+            context.beginPath();
+            context.moveTo(0, y);
+            context.lineTo(canvas.width, y);
+            context.stroke();
+          }
+
+          // Create texture from canvas
+          const texture = new THREE.CanvasTexture(canvas);
+          texture.wrapS = THREE.RepeatWrapping;
+          texture.wrapT = THREE.RepeatWrapping;
+          texture.repeat.set(1, 1);
+
+          // Create material with the texture
+          return new THREE.MeshStandardMaterial({
+            map: texture,
+            roughness: 0.5,
+            metalness: 0.1,
           });
         },
 
