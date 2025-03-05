@@ -205,13 +205,36 @@
 
         // Set up ground plane
         setupGround() {
-          // Three.js ground
-          const groundGeometry = new THREE.PlaneGeometry(50, 50);
+          // Three.js ground - 10x larger (500x500 instead of 50x50)
+          const groundGeometry = new THREE.PlaneGeometry(500, 500);
+
+          // Load grass texture
+          const textureLoader = new THREE.TextureLoader();
+          const grassTexture = textureLoader.load(
+            "https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/terrain/grasslight-big.jpg",
+            // Add onLoad callback
+            () => {
+              console.log("Grass texture loaded successfully");
+            },
+            // Add onProgress callback (optional)
+            undefined,
+            // Add onError callback
+            (err) => {
+              console.error("Error loading grass texture:", err);
+            }
+          );
+
+          // Repeat the texture to make it look more realistic
+          grassTexture.wrapS = THREE.RepeatWrapping;
+          grassTexture.wrapT = THREE.RepeatWrapping;
+          grassTexture.repeat.set(30, 30); // More repeats for the larger plane
+
           const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x999999,
+            map: grassTexture,
             roughness: 0.8,
-            metalness: 0.2,
+            metalness: 0.1,
           });
+
           const ground = new THREE.Mesh(groundGeometry, groundMaterial);
           ground.rotation.x = -Math.PI / 2;
           ground.receiveShadow = true;
