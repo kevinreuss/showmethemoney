@@ -405,7 +405,7 @@
           if (numBills <= 0) return;
 
           // For amounts under 100 million, use special edge texture
-          const useEdgeTexture = amount < 100000000;
+          const useEdgeTexture = false; //amount < 100000000;
 
           // Check if we should use textures (disable for amounts >= 1 billion)
           const useTextures = amount < 1000000000;
