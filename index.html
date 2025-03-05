@@ -145,7 +145,7 @@
           this.renderer = new THREE.WebGLRenderer({ antialias: true });
           this.renderer.setSize(window.innerWidth, window.innerHeight);
           this.renderer.setPixelRatio(window.devicePixelRatio);
-          this.renderer.shadowMap.enabled = true;
+          this.renderer.shadowMap.enabled = false; // Disable shadows
           document
             .getElementById("canvas-container")
             .appendChild(this.renderer.domElement);
@@ -188,18 +188,10 @@
           const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
           this.scene.add(ambientLight);
 
-          // Directional light (sun)
+          // Directional light (sun) - disable shadows
           const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
           directionalLight.position.set(10, 20, 10);
-          directionalLight.castShadow = true;
-          directionalLight.shadow.mapSize.width = 2048;
-          directionalLight.shadow.mapSize.height = 2048;
-          directionalLight.shadow.camera.near = 0.5;
-          directionalLight.shadow.camera.far = 50;
-          directionalLight.shadow.camera.left = -20;
-          directionalLight.shadow.camera.right = 20;
-          directionalLight.shadow.camera.top = 20;
-          directionalLight.shadow.camera.bottom = -20;
+          directionalLight.castShadow = false; // Disable shadow casting
           this.scene.add(directionalLight);
         },
 
@@ -237,7 +229,7 @@
 
           const ground = new THREE.Mesh(groundGeometry, groundMaterial);
           ground.rotation.x = -Math.PI / 2;
-          ground.receiveShadow = true;
+          ground.receiveShadow = false; // Disable shadow receiving
           this.scene.add(ground);
 
           // Cannon.js ground - updated for old Cannon.js syntax
@@ -309,8 +301,8 @@
           ];
 
           this.billMesh = new THREE.Mesh(billGeometry, materials);
-          this.billMesh.castShadow = true;
-          this.billMesh.receiveShadow = true;
+          this.billMesh.castShadow = false; // Disable shadow casting
+          this.billMesh.receiveShadow = false; // Disable shadow receiving
         },
 
         // Set up event listeners
@@ -711,11 +703,9 @@
           const scaleY = stackHeight / standardStackHeight;
           stackMesh.scale.y = scaleY;
 
-          // Determine if we should use detailed shadows based on number of stacks
-          const useDetailedShadows = this.bills.length < 1000; // Only use detailed shadows for fewer than 1000 stacks
-
-          stackMesh.castShadow = useDetailedShadows;
-          stackMesh.receiveShadow = useDetailedShadows;
+          // Disable shadows for all stacks
+          stackMesh.castShadow = false;
+          stackMesh.receiveShadow = false;
 
           // Position the mesh directly in the scene (no group)
           stackMesh.position.set(
