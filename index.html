@@ -29,12 +29,12 @@
         gap: 15px;
       }
 
-      #amount {
+      #amount-select {
         padding: 8px;
         font-size: 16px;
         border: 1px solid #ccc;
         border-radius: 4px;
-        width: 150px;
+        width: 300px;
       }
 
       #render-btn {
@@ -72,8 +72,19 @@
   <body>
     <div id="container">
       <div id="controls">
-        <label for="amount">Amount in dollars:</label>
-        <input type="number" id="amount" min="0" step="100" value="100000" />
+        <label for="amount-select">Select an amount:</label>
+        <select id="amount-select">
+          <option value="1000000">$1 Million</option>
+          <option value="234000000000">
+            Elon Musk's Net Worth ($234 billion)
+          </option>
+          <option value="60000">1 Bitcoin (~$90,000)</option>
+          <option value="1000000000">$1 Billion</option>
+          <option value="31400000000">
+            US Annual Coffee Spending ($31.4 billion)
+          </option>
+          <option value="500000">Average US Home Price ($500,000)</option>
+        </select>
         <button id="render-btn">Show me the money</button>
         <div id="info">0 x 100$ bill</div>
       </div>
@@ -107,7 +118,7 @@
         ENABLE_NAVIGATION: true, // Flag to enable/disable 3D navigation
 
         // DOM elements
-        amountInput: document.getElementById("amount"),
+        amountSelect: document.getElementById("amount-select"),
         renderBtn: document.getElementById("render-btn"),
         infoElement: document.getElementById("info"),
 
@@ -308,6 +319,10 @@
         // Set up event listeners
         setupEventListeners() {
           this.renderBtn.addEventListener("click", this.renderBills.bind(this));
+          this.amountSelect.addEventListener(
+            "change",
+            this.renderBills.bind(this)
+          );
 
           // Use mousedown for bill selection
           this.renderer.domElement.addEventListener("mousedown", (event) => {
@@ -380,19 +395,18 @@
           this.selectedBill.body.wakeUp();
         },
 
-        // Render bills based on input amount
+        // Render bills based on selected amount
         renderBills() {
           // Clear existing bills
           this.clearBills();
 
-          // Get amount and round to nearest $100
-          let amount = parseFloat(this.amountInput.value);
+          // Get amount from the select element
+          let amount = parseFloat(this.amountSelect.value);
           if (isNaN(amount)) amount = 0;
 
           // Round to nearest $100
           amount = Math.round(amount / 100) * 100;
           amount = Math.min(amount, 500000000000);
-          this.amountInput.value = amount;
 
           // Calculate number of bills
           const numBills = amount / 100;
@@ -405,7 +419,7 @@
           if (numBills <= 0) return;
 
           // For amounts under 100 million, use special edge texture
-          const useEdgeTexture = false; //amount < 100000000;
+          const useEdgeTexture = amount < 100000000;
 
           // Check if we should use textures (disable for amounts >= 1 billion)
           const useTextures = amount < 1000000000;
