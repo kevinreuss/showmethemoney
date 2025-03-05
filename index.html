@@ -399,6 +399,7 @@
 
           // Round to nearest $100
           amount = Math.round(amount / 100) * 100;
+          amount = Math.min(amount, 500000000000);
           this.amountInput.value = amount;
 
           // Calculate number of bills
