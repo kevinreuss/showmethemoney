@@ -147,16 +147,13 @@
             .getElementById("canvas-container")
             .appendChild(this.renderer.domElement);
 
-          // Add orbit controls but disable rotation
+          // Add orbit controls with navigation control variable
+          this.ALLOW_NAVIGATION = true; // Control variable for navigation
           this.controls = new THREE.OrbitControls(
             this.camera,
             this.renderer.domElement
           );
-          this.controls.enableRotate = false; // Disable rotation
-          this.controls.enablePan = false; // Disable panning
-          this.controls.enableZoom = true; // Allow zooming only
-          this.controls.enableDamping = true;
-          this.controls.dampingFactor = 0.05;
+          this.updateNavigationControls();
 
           // Handle window resize
           window.addEventListener("resize", () => {
@@ -170,6 +167,16 @@
           this.mouse = new THREE.Vector2();
           this.selectedBill = null;
           this.intersectedBill = null;
+        },
+
+        // Add a new method to update navigation controls based on ALLOW_NAVIGATION
+        updateNavigationControls() {
+          // Enable or disable all navigation controls based on ALLOW_NAVIGATION
+          this.controls.enableRotate = this.ALLOW_NAVIGATION;
+          this.controls.enablePan = this.ALLOW_NAVIGATION;
+          this.controls.enableZoom = this.ALLOW_NAVIGATION;
+          this.controls.enableDamping = true;
+          this.controls.dampingFactor = 0.05;
         },
 
         // Set up physics world
