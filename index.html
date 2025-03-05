@@ -505,11 +505,6 @@
           // Calculate stack height
           const stackHeight = billThickness * numBills;
 
-          // Create a group to hold the stack
-          const stackGroup = new THREE.Group();
-          stackGroup.position.set(x, y, z);
-          this.scene.add(stackGroup);
-
           // Create main stack geometry (one big box instead of individual bills)
           const stackGeometry = new THREE.BoxGeometry(
             billWidth,
@@ -549,14 +544,17 @@
           stackMesh.castShadow = true;
           stackMesh.receiveShadow = true;
 
-          // Position the stack so its bottom is at y=0
-          stackMesh.position.y = stackHeight / 2;
+          // Position the mesh directly in the scene (no group)
+          stackMesh.position.set(
+            x,
+            y + stackHeight / 2, // Position the stack so its bottom is at y
+            z
+          );
+          this.scene.add(stackMesh);
 
-          stackGroup.add(stackMesh);
-
-          // Store reference to the stack
+          // Store reference to the stack mesh directly
           this.bills.push({
-            mesh: stackGroup,
+            mesh: stackMesh,
             billCount: numBills,
             isVisualStack: true,
           });
