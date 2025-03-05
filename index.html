@@ -388,6 +388,9 @@
 
           if (numBills <= 0) return;
 
+          // For amounts under 100 million, use special edge texture
+          const useEdgeTexture = amount < 100000000;
+
           // Check if we should use textures (disable for amounts >= 1 billion)
           const useTextures = amount < 1000000000;
 
@@ -417,6 +420,30 @@
             billHeight
           );
 
+          // Create edge texture if needed
+          let edgeTexture = null;
+          if (useEdgeTexture) {
+            const edgeTextureCanvas = document.createElement("canvas");
+            const ctx = edgeTextureCanvas.getContext("2d");
+            edgeTextureCanvas.width = 128;
+            edgeTextureCanvas.height = 16;
+
+            // Fill with light beige color (paper color)
+            ctx.fillStyle = "#f5f3e8";
+            ctx.fillRect(0, 0, 128, 16);
+
+            // Add thin black lines to represent bill edges
+            ctx.fillStyle = "#000000";
+            for (let i = 0; i < 16; i += 2) {
+              ctx.fillRect(0, i, 128, 0.5);
+            }
+
+            edgeTexture = new THREE.CanvasTexture(edgeTextureCanvas);
+            edgeTexture.wrapS = THREE.RepeatWrapping;
+            edgeTexture.wrapT = THREE.RepeatWrapping;
+            edgeTexture.repeat.set(10, 10);
+          }
+
           // Create shared materials
           this.sharedTopMaterial = new THREE.MeshStandardMaterial({
             map: this.billTexture,
@@ -424,11 +451,17 @@
             metalness: 0.1,
           });
 
-          this.sharedSideMaterial = new THREE.MeshStandardMaterial({
-            color: 0xcccccc,
-            roughness: 0.5,
-            metalness: 0.1,
-          });
+          this.sharedSideMaterial = useEdgeTexture
+            ? new THREE.MeshStandardMaterial({
+                map: edgeTexture,
+                roughness: 0.5,
+                metalness: 0.1,
+              })
+            : new THREE.MeshStandardMaterial({
+                color: 0xf5f3e8,
+                roughness: 0.5,
+                metalness: 0.1,
+              });
 
           // Create shared materials array
           this.sharedMaterials = [
