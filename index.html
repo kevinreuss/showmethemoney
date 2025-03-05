@@ -400,26 +400,37 @@
           const fullStackHeight = billThickness * billsPerStack;
 
           // Calculate the optimal dimensions for a cube-like arrangement
-          // We need to consider the different dimensions of the bills and stacks
-
-          // First, calculate the total volume we need to fill
-          // and determine how many stacks we need in each dimension
+          // We want the height to be about 2/3 of the width and depth
+          const heightRatio = 2 / 3; // Height should be 2/3 of width/depth
 
           // Calculate the aspect ratios relative to the smallest dimension (thickness)
           const widthToThicknessRatio = spacingX / fullStackHeight;
           const heightToThicknessRatio = spacingZ / fullStackHeight;
 
-          // Calculate the cube root of the total number of stacks
-          // This would be the ideal number of stacks per dimension for a perfect cube
-          const idealStacksPerDimension = Math.pow(numStacks, 1 / 3);
+          // Calculate the cube root of the total number of stacks, adjusted for height ratio
+          // For a perfect cube with height = 2/3 * width, we need to solve:
+          // (x * y * z) = numStacks, where z = heightRatio * x and z = heightRatio * y
+          // This gives us: (x * y * heightRatio * x) = numStacks
+          // Or: (heightRatio * x² * y) = numStacks
 
-          // Adjust for the aspect ratios to get a visually cubic arrangement
-          let stacksInY = Math.round(idealStacksPerDimension);
+          // If we assume x ≈ y for a square base, then:
+          // (heightRatio * x³) = numStacks
+          // x = (numStacks / heightRatio)^(1/3)
+
+          const idealBaseStacksPerDimension = Math.pow(
+            numStacks / heightRatio,
+            1 / 3
+          );
+          const idealHeightStacksPerDimension =
+            idealBaseStacksPerDimension * heightRatio;
+
+          // Adjust for the aspect ratios to get a visually balanced arrangement
+          let stacksInY = Math.round(idealHeightStacksPerDimension);
           let stacksInX = Math.round(
-            idealStacksPerDimension / widthToThicknessRatio
+            idealBaseStacksPerDimension / widthToThicknessRatio
           );
           let stacksInZ = Math.round(
-            idealStacksPerDimension / heightToThicknessRatio
+            idealBaseStacksPerDimension / heightToThicknessRatio
           );
 
           // Ensure we have at least 1 stack in each dimension
@@ -430,15 +441,22 @@
           // Ensure we have enough total stacks
           while (stacksInX * stacksInY * stacksInZ < numStacks) {
             // Increase the dimension with the smallest physical size first
-            if (
-              stacksInX * spacingX <= stacksInZ * spacingZ &&
-              stacksInX * spacingX <= stacksInY * fullStackHeight
-            ) {
-              stacksInX++;
-            } else if (stacksInZ * spacingZ <= stacksInY * fullStackHeight) {
-              stacksInZ++;
-            } else {
+            // But prefer to keep the height at about 2/3 of width/depth
+            const physicalX = stacksInX * spacingX;
+            const physicalY = stacksInY * fullStackHeight;
+            const physicalZ = stacksInZ * spacingZ;
+
+            // Target height is 2/3 of the average base dimension
+            const targetHeight = (heightRatio * (physicalX + physicalZ)) / 2;
+
+            if (physicalY < targetHeight) {
+              // Height is too small relative to base, increase height
               stacksInY++;
+            } else if (physicalX <= physicalZ) {
+              // Base is not square, increase the smaller dimension
+              stacksInX++;
+            } else {
+              stacksInZ++;
             }
           }
 
