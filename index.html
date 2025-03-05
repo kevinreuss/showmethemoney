@@ -404,7 +404,10 @@
 
           // Calculate grid layout
           let gridSize = Math.ceil(Math.sqrt(numStacks));
-          let spacing = 2.5; // Spacing between stacks
+
+          // Base spacing on bill dimensions for a consistent look
+          let spacingX = billWidth * 1.15; // Horizontal spacing with small gap
+          let spacingZ = billHeight * 1.15; // Vertical spacing proportional to bill height
 
           for (let i = 0; i < numStacks; i++) {
             // Calculate how many bills in this stack (last stack might be partial)
@@ -417,9 +420,9 @@
             let row = Math.floor(i / gridSize);
             let col = i % gridSize;
 
-            let offsetX = (col - (gridSize - 1) / 2) * spacing;
+            let offsetX = (col - (gridSize - 1) / 2) * spacingX;
             let offsetZ =
-              (row - (Math.ceil(numStacks / gridSize) - 1) / 2) * spacing;
+              (row - (Math.ceil(numStacks / gridSize) - 1) / 2) * spacingZ;
 
             // Create a visual stack without physics
             this.createVisualStack(
