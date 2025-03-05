@@ -517,7 +517,7 @@
             billHeight
           );
 
-          // Always use textured material for the top face
+          // Use textured material for the top face
           const frontMaterial = new THREE.MeshStandardMaterial({
             map: this.billTexture,
             roughness: 0.5,
@@ -554,11 +554,6 @@
           stackMesh.position.y = stackHeight / 2;
 
           stackGroup.add(stackMesh);
-
-          // Always add top bill regardless of amount
-          const topBill = this.billMesh.clone();
-          topBill.position.y = stackHeight + billThickness / 2;
-          stackGroup.add(topBill);
 
           // Store reference to the stack
           this.bills.push({
