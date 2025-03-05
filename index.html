@@ -402,12 +402,20 @@
           const stackValue = 10000;
           const numStacks = Math.ceil(amount / stackValue);
 
-          // Calculate grid layout
-          let gridSize = Math.ceil(Math.sqrt(numStacks));
+          // Maximum grid size: can be different for X and Y
+          const maxGridSizeX = 3; // Maximum columns
+          const maxGridSizeY = 5; // Maximum rows
 
           // Base spacing on bill dimensions for a consistent look
           let spacingX = billWidth * 1.15; // Horizontal spacing with small gap
           let spacingZ = billHeight * 1.15; // Vertical spacing proportional to bill height
+
+          // Calculate how many stacks per layer
+          const stacksPerLayer = maxGridSizeX * maxGridSizeY;
+          const numLayers = Math.ceil(numStacks / stacksPerLayer);
+
+          // Height of a full stack (100 bills)
+          const fullStackHeight = billThickness * billsPerStack;
 
           for (let i = 0; i < numStacks; i++) {
             // Calculate how many bills in this stack (last stack might be partial)
@@ -416,18 +424,25 @@
 
             if (stackBills <= 0) break;
 
-            // Calculate position in grid
-            let row = Math.floor(i / gridSize);
-            let col = i % gridSize;
+            // Calculate which layer this stack belongs to
+            const layer = Math.floor(i / stacksPerLayer);
 
-            let offsetX = (col - (gridSize - 1) / 2) * spacingX;
-            let offsetZ =
-              (row - (Math.ceil(numStacks / gridSize) - 1) / 2) * spacingZ;
+            // Calculate position within the current layer's grid
+            const posInLayer = i % stacksPerLayer;
+            const row = Math.floor(posInLayer / maxGridSizeX);
+            const col = posInLayer % maxGridSizeX;
+
+            // Center the grid
+            let offsetX = (col - (maxGridSizeX - 1) / 2) * spacingX;
+            let offsetZ = (row - (maxGridSizeY - 1) / 2) * spacingZ;
+
+            // Y position depends on the layer
+            let offsetY = layer * fullStackHeight;
 
             // Create a visual stack without physics
             this.createVisualStack(
               offsetX,
-              0, // Start at ground level
+              offsetY, // Start at the appropriate layer height
               offsetZ,
               stackBills
             );
