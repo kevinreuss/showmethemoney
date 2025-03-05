@@ -75,7 +75,7 @@
         <label for="amount">Amount in dollars:</label>
         <input type="number" id="amount" min="0" step="100" value="100000" />
         <button id="render-btn">Render</button>
-        <div id="info">Bills: 0</div>
+        <div id="info">0 x 100$ bill</div>
       </div>
       <div id="canvas-container"></div>
     </div>
@@ -116,6 +116,10 @@
           this.setupGround();
           this.loadBillTexture();
           this.setupEventListeners();
+
+          // Render bills immediately after initialization
+          this.renderBills();
+
           this.animate();
         },
 
@@ -374,7 +378,7 @@
 
           // Calculate number of bills
           const numBills = amount / 100;
-          this.infoElement.textContent = `Bills: ${numBills}`;
+          this.infoElement.textContent = `${numBills} x 100$ bill`;
 
           if (numBills <= 0) return;
 
