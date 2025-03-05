@@ -517,33 +517,32 @@
             billHeight
           );
 
-          // Use textured material for the top face
-          const frontMaterial = new THREE.MeshStandardMaterial({
+          // Create materials array with only 2 materials instead of 6
+          // Material 0: Used for all sides and bottom (5 faces)
+          // Material 1: Used for top face with texture (1 face)
+
+          // Top face with bill texture (index 2 in BoxGeometry)
+          const topMaterial = new THREE.MeshStandardMaterial({
             map: this.billTexture,
             roughness: 0.5,
             metalness: 0.1,
           });
 
-          const backMaterial = new THREE.MeshStandardMaterial({
-            color: 0x85bb65,
-            roughness: 0.5,
-            metalness: 0.2,
-          });
-
-          // Simple edge material without lines for large amounts
-          const edgeMaterial = new THREE.MeshStandardMaterial({
+          // Single material for all other faces
+          const sideMaterial = new THREE.MeshStandardMaterial({
             color: 0xcccccc,
             roughness: 0.5,
             metalness: 0.1,
           });
 
+          // Create materials array with specific assignment to faces
           const materials = [
-            edgeMaterial, // right side
-            edgeMaterial, // left side
-            frontMaterial, // top (front of bill)
-            backMaterial, // bottom (back of bill)
-            edgeMaterial, // front edge
-            edgeMaterial, // back edge
+            sideMaterial, // right side (index 0)
+            sideMaterial, // left side (index 1)
+            topMaterial, // top face with texture (index 2)
+            sideMaterial, // bottom face (index 3)
+            sideMaterial, // front edge (index 4)
+            sideMaterial, // back edge (index 5)
           ];
 
           const stackMesh = new THREE.Mesh(stackGeometry, materials);
