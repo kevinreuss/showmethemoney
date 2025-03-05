@@ -170,12 +170,9 @@
 
         // Set up physics world
         setupPhysics() {
-          // Using old Cannon.js syntax
+          // Create a world with gravity but we won't be adding bodies to it
           this.world = new CANNON.World();
           this.world.gravity.set(0, -9.82, 0);
-          this.world.broadphase = new CANNON.NaiveBroadphase();
-          this.world.solver.iterations = 10;
-          this.world.allowSleep = true;
         },
 
         // Set up lights
@@ -258,10 +255,10 @@
           );
 
           // Create bill geometry (100 dollar bill dimensions: 156mm x 66.3mm x 0.11mm)
-          // Scale up thickness for better physics and visibility
+          // Using realistic dimensions
           const billWidth = 1.56;
           const billHeight = 0.663;
-          const billThickness = 0.02;
+          const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
 
           const billGeometry = new THREE.BoxGeometry(
             billWidth,
@@ -398,20 +395,23 @@
           // Create bills
           const billWidth = 1.56;
           const billHeight = 0.663;
-          const billThickness = 0.02;
+          const billThickness = 0.0011; // Realistische Dicke
 
-          // Determine stack configuration
-          let stackSize = Math.min(20, numBills); // Max 20 bills per stack
-          let numStacks = Math.ceil(numBills / stackSize);
+          // Each stack represents $10,000 (100 bills)
+          const billsPerStack = 100;
+          const stackValue = 10000;
+          const numStacks = Math.ceil(amount / stackValue);
 
           // Calculate grid layout
           let gridSize = Math.ceil(Math.sqrt(numStacks));
-          let spacing = 2.5;
-
-          let billsCreated = 0;
+          let spacing = 2.5; // Spacing between stacks
 
           for (let i = 0; i < numStacks; i++) {
-            if (billsCreated >= numBills) break;
+            // Calculate how many bills in this stack (last stack might be partial)
+            const remainingAmount = amount - i * stackValue;
+            const stackBills = Math.min(billsPerStack, remainingAmount / 100);
+
+            if (stackBills <= 0) break;
 
             // Calculate position in grid
             let row = Math.floor(i / gridSize);
@@ -421,69 +421,57 @@
             let offsetZ =
               (row - (Math.ceil(numStacks / gridSize) - 1) / 2) * spacing;
 
-            // Create stack at this position
-            let stackHeight = Math.min(stackSize, numBills - billsCreated);
-
-            for (let j = 0; j < stackHeight; j++) {
-              this.createBill(
-                offsetX,
-                billThickness / 2 + j * billThickness,
-                offsetZ
-              );
-              billsCreated++;
-            }
+            // Create a visual stack without physics
+            this.createVisualStack(
+              offsetX,
+              0, // Start at ground level
+              offsetZ,
+              stackBills
+            );
           }
         },
 
-        // Create a single bill
-        createBill(x, y, z) {
-          // Create Three.js mesh
-          const bill = this.billMesh.clone();
-          bill.position.set(x, y, z);
+        // Create a visual stack of bills without physics
+        createVisualStack(x, y, z, numBills) {
+          const billWidth = 1.56;
+          const billHeight = 0.663;
+          const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
 
-          // Add slight random rotation for realism
-          bill.rotation.set(
-            (Math.random() - 0.5) * 0.05,
-            (Math.random() - 0.5) * 0.05,
-            (Math.random() - 0.5) * 0.05
-          );
+          // Create a group to hold all bills in this stack
+          const stackGroup = new THREE.Group();
+          stackGroup.position.set(x, y, z);
+          this.scene.add(stackGroup);
 
-          this.scene.add(bill);
+          // Add individual bill meshes to the stack with slight offset for visibility
+          for (let i = 0; i < numBills; i++) {
+            const bill = this.billMesh.clone();
 
-          // Create Cannon.js body - updated for old Cannon.js syntax
-          const billShape = new CANNON.Box(
-            new CANNON.Vec3(
-              1.56 / 2, // half width
-              0.02 / 2, // half height (thickness)
-              0.663 / 2 // half depth
-            )
-          );
+            // Position each bill with a very slight offset for better visibility
+            // This creates a small "stair-step" effect to see individual bills
+            const offsetX = (Math.random() - 0.5) * 0.01; // Tiny random X offset
+            const offsetZ = (Math.random() - 0.5) * 0.01; // Tiny random Z offset
 
-          const billBody = new CANNON.Body({
-            mass: 0.1, // 100 dollar bill weighs about 1 gram
-          });
-          billBody.addShape(billShape);
-          billBody.position.set(x, y, z);
+            bill.position.set(
+              offsetX,
+              billThickness * i + billThickness / 2,
+              offsetZ
+            );
 
-          // Create material with friction and restitution
-          const billMaterial = new CANNON.Material();
-          billMaterial.friction = 0.3;
-          billMaterial.restitution = 0.3;
-          billBody.material = billMaterial;
+            // Very slight random rotation for realism
+            bill.rotation.set(
+              0,
+              (Math.random() - 0.5) * 0.02, // Tiny random Y rotation
+              0
+            );
 
-          // Apply the same rotation
-          billBody.quaternion.setFromEuler(
-            bill.rotation.x,
-            bill.rotation.y,
-            bill.rotation.z
-          );
+            stackGroup.add(bill);
+          }
 
-          this.world.addBody(billBody);
-
-          // Store reference to both the mesh and body
+          // Store reference to the stack
           this.bills.push({
-            mesh: bill,
-            body: billBody,
+            mesh: stackGroup,
+            billCount: numBills,
+            isVisualStack: true,
           });
         },
 
@@ -491,23 +479,19 @@
         clearBills() {
           for (const bill of this.bills) {
             this.scene.remove(bill.mesh);
-            this.world.removeBody(bill.body);
+            // Only remove physics bodies if they exist
+            if (bill.body) {
+              this.world.removeBody(bill.body);
+            }
           }
           this.bills = [];
         },
 
-        // Animation loop
+        // Animation loop - simplified without physics
         animate() {
           requestAnimationFrame(this.animate.bind(this));
 
-          // Update physics
-          this.world.step(this.timeStep);
-
-          // Update meshes to match physics bodies
-          for (const bill of this.bills) {
-            bill.mesh.position.copy(bill.body.position);
-            bill.mesh.quaternion.copy(bill.body.quaternion);
-          }
+          // No physics updates needed
 
           // Update controls
           this.controls.update();
