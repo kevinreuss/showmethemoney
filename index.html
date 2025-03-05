@@ -337,7 +337,6 @@
                 bill.mesh.id === selectedMesh.id
               ) {
                 this.selectedBill = bill;
-                console.log("Bill selected!");
                 break;
               }
             }
@@ -465,15 +464,9 @@
             if (remainingBills <= 0) break;
           }
 
-          // Log statistics
-          console.log(`Total bills: ${numBills}`);
-          console.log(
-            `Theoretical 10k stacks: ${Math.ceil(numBills / billsPerStack)}`
-          );
-          console.log(`Actual stacks created: ${gridPositions.size}`);
-
           // Create stacks for each grid position
           let stacksCreated = 0;
+          console.log(gridPositions);
           for (const [_, position] of gridPositions) {
             this.createVisualStack(
               position.x,
@@ -490,6 +483,7 @@
 
         // Create a visual stack of bills without physics - optimized version
         createVisualStack(x, y, z, numBills) {
+          console.log(numBills);
           const billWidth = 1.56;
           const billHeight = 0.663;
           const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
