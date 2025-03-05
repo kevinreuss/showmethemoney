@@ -385,19 +385,28 @@
 
           // Calculate number of bills
           const numBills = amount / 100;
-          this.infoElement.textContent = `Bills: ${numBills}`;
+
+          // Format numbers with thousands separators
+          const formattedBills = numBills.toLocaleString();
+          const formattedAmount = amount.toLocaleString("en-US", {
+            style: "currency",
+            currency: "USD",
+            maximumFractionDigits: 0,
+          });
+
+          // Update info display with formatted numbers
+          this.infoElement.textContent = `${formattedBills} × $100 bills = ${formattedAmount}`;
 
           if (numBills <= 0) return;
 
           // Create bills
           const billWidth = 1.56;
           const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke
+          const billThickness = 0.0011; // Realistic thickness
 
           // Each stack represents $10,000 (100 bills)
           const billsPerStack = 100;
           const stackValue = 10000;
-          const numStacks = Math.ceil(amount / stackValue);
 
           // Base spacing on bill dimensions for a consistent look
           let spacingX = billWidth * 1.15; // Horizontal spacing with small gap
@@ -406,101 +415,89 @@
           // Height of a full stack (100 bills)
           const fullStackHeight = billThickness * billsPerStack;
 
+          // For very large amounts, we'll combine multiple stacks into larger blocks
+          // Each mega-stack can represent multiple 10k stacks stacked vertically
+          const maxStacksInY = 10; // Maximum number of stacks to combine vertically
+          const megaStackValue = stackValue * maxStacksInY;
+
+          // Calculate how many mega-stacks we need
+          const numMegaStacks = Math.ceil(amount / megaStackValue);
+
           // Calculate the optimal dimensions for a cube-like arrangement
-          // We want the height to be about 2/3 of the width and depth
           const heightRatio = 2 / 3; // Height should be 2/3 of width/depth
 
-          // Calculate the aspect ratios relative to the smallest dimension (thickness)
-          const widthToThicknessRatio = spacingX / fullStackHeight;
-          const heightToThicknessRatio = spacingZ / fullStackHeight;
-
-          // Calculate the cube root of the total number of stacks, adjusted for height ratio
-          // For a perfect cube with height = 2/3 * width, we need to solve:
-          // (x * y * z) = numStacks, where z = heightRatio * x and z = heightRatio * y
-          // This gives us: (x * y * heightRatio * x) = numStacks
-          // Or: (heightRatio * x² * y) = numStacks
-
-          // If we assume x ≈ y for a square base, then:
-          // (heightRatio * x³) = numStacks
-          // x = (numStacks / heightRatio)^(1/3)
-
+          // Calculate the cube root of the total number of mega-stacks, adjusted for height ratio
           const idealBaseStacksPerDimension = Math.pow(
-            numStacks / heightRatio,
+            numMegaStacks / heightRatio,
             1 / 3
           );
           const idealHeightStacksPerDimension =
             idealBaseStacksPerDimension * heightRatio;
 
           // Adjust for the aspect ratios to get a visually balanced arrangement
-          let stacksInY = Math.round(idealHeightStacksPerDimension);
-          let stacksInX = Math.round(
-            idealBaseStacksPerDimension / widthToThicknessRatio
+          let stacksInX = Math.max(1, Math.round(idealBaseStacksPerDimension));
+          let stacksInZ = Math.max(1, Math.round(idealBaseStacksPerDimension));
+          let stacksInY = Math.max(
+            1,
+            Math.round(idealHeightStacksPerDimension)
           );
-          let stacksInZ = Math.round(
-            idealBaseStacksPerDimension / heightToThicknessRatio
-          );
 
-          // Ensure we have at least 1 stack in each dimension
-          stacksInX = Math.max(1, stacksInX);
-          stacksInY = Math.max(1, stacksInY);
-          stacksInZ = Math.max(1, stacksInZ);
-
-          // Ensure we have enough total stacks
-          while (stacksInX * stacksInY * stacksInZ < numStacks) {
-            // Increase the dimension with the smallest physical size first
-            // But prefer to keep the height at about 2/3 of width/depth
-            const physicalX = stacksInX * spacingX;
-            const physicalY = stacksInY * fullStackHeight;
-            const physicalZ = stacksInZ * spacingZ;
-
-            // Target height is 2/3 of the average base dimension
-            const targetHeight = (heightRatio * (physicalX + physicalZ)) / 2;
-
-            if (physicalY < targetHeight) {
-              // Height is too small relative to base, increase height
-              stacksInY++;
-            } else if (physicalX <= physicalZ) {
-              // Base is not square, increase the smaller dimension
+          // Ensure we have enough total mega-stacks
+          while (stacksInX * stacksInY * stacksInZ < numMegaStacks) {
+            if (stacksInX <= stacksInZ) {
               stacksInX++;
             } else {
               stacksInZ++;
             }
           }
 
-          // Now place the stacks in a 3D grid
-          let stackIndex = 0;
+          // Now place the mega-stacks in a 3D grid
+          let megaStackIndex = 0;
 
-          for (let y = 0; y < stacksInY && stackIndex < numStacks; y++) {
-            for (let z = 0; z < stacksInZ && stackIndex < numStacks; z++) {
-              for (let x = 0; x < stacksInX && stackIndex < numStacks; x++) {
-                // Calculate how many bills in this stack (last stack might be partial)
-                const remainingAmount = amount - stackIndex * stackValue;
-                const stackBills = Math.min(
-                  billsPerStack,
+          for (
+            let y = 0;
+            y < stacksInY && megaStackIndex < numMegaStacks;
+            y++
+          ) {
+            for (
+              let z = 0;
+              z < stacksInZ && megaStackIndex < numMegaStacks;
+              z++
+            ) {
+              for (
+                let x = 0;
+                x < stacksInX && megaStackIndex < numMegaStacks;
+                x++
+              ) {
+                // Calculate how many bills in this mega-stack (last one might be partial)
+                const remainingAmount =
+                  amount - megaStackIndex * megaStackValue;
+                const megaStackBills = Math.min(
+                  billsPerStack * maxStacksInY,
                   remainingAmount / 100
                 );
 
-                if (stackBills <= 0) break;
+                if (megaStackBills <= 0) break;
 
                 // Calculate position in 3D grid
                 let offsetX = (x - (stacksInX - 1) / 2) * spacingX;
                 let offsetZ = (z - (stacksInZ - 1) / 2) * spacingZ;
-                let offsetY = y * fullStackHeight;
+                let offsetY = y * fullStackHeight * maxStacksInY;
 
-                // Create a visual stack without physics
-                this.createVisualStack(offsetX, offsetY, offsetZ, stackBills);
+                // Create a visual mega-stack
+                this.createMegaStack(offsetX, offsetY, offsetZ, megaStackBills);
 
-                stackIndex++;
+                megaStackIndex++;
               }
             }
           }
         },
 
-        // Create a visual stack of bills without physics - optimized version
-        createVisualStack(x, y, z, numBills) {
+        // Create a mega-stack that combines multiple 10k stacks vertically
+        createMegaStack(x, y, z, numBills) {
           const billWidth = 1.56;
           const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
+          const billThickness = 0.0011;
 
           // Calculate stack height
           const stackHeight = billThickness * numBills;
