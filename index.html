@@ -491,7 +491,7 @@
         createVisualStack(x, y, z, numBills) {
           const billWidth = 1.56;
           const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
+          const billThickness = 0.0011;
 
           // Calculate stack height
           const stackHeight = billThickness * numBills;
@@ -508,7 +508,7 @@
             billHeight
           );
 
-          // Create materials for the stack
+          // Use simple materials without textures for better performance
           const frontMaterial = new THREE.MeshStandardMaterial({
             map: this.billTexture,
             roughness: 0.5,
@@ -521,11 +521,12 @@
             metalness: 0.2,
           });
 
-          // Create side materials with lines to represent individual bills
-          const edgeMaterial = this.createEdgeMaterialWithLines(
-            numBills,
-            billThickness
-          );
+          // Simple edge material without lines
+          const edgeMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcccccc,
+            roughness: 0.5,
+            metalness: 0.1,
+          });
 
           const materials = [
             edgeMaterial, // right side
@@ -545,8 +546,8 @@
 
           stackGroup.add(stackMesh);
 
-          // Add a single bill on top for better visibility
-          if (numBills > 0) {
+          // Only add top bill for smaller stacks to improve performance
+          if (numBills > 0 && numBills < 50) {
             const topBill = this.billMesh.clone();
             topBill.position.y = stackHeight + billThickness / 2;
             stackGroup.add(topBill);
@@ -557,48 +558,6 @@
             mesh: stackGroup,
             billCount: numBills,
             isVisualStack: true,
-          });
-        },
-
-        // Create a material with lines to represent individual bills
-        createEdgeMaterialWithLines(numBills, billThickness) {
-          // Create a canvas to draw the lines
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-
-          // Set canvas size (height represents the stack height)
-          canvas.width = 256;
-          canvas.height = 1024;
-
-          // Fill with base color
-          context.fillStyle = "#cccccc";
-          context.fillRect(0, 0, canvas.width, canvas.height);
-
-          // Draw horizontal lines for each bill
-          context.strokeStyle = "#999999";
-          context.lineWidth = 1;
-
-          const lineSpacing = canvas.height / numBills;
-
-          for (let i = 0; i < numBills; i++) {
-            const y = i * lineSpacing;
-            context.beginPath();
-            context.moveTo(0, y);
-            context.lineTo(canvas.width, y);
-            context.stroke();
-          }
-
-          // Create texture from canvas
-          const texture = new THREE.CanvasTexture(canvas);
-          texture.wrapS = THREE.RepeatWrapping;
-          texture.wrapT = THREE.RepeatWrapping;
-          texture.repeat.set(1, 1);
-
-          // Create material with the texture
-          return new THREE.MeshStandardMaterial({
-            map: texture,
-            roughness: 0.5,
-            metalness: 0.1,
           });
         },
 
@@ -625,6 +584,103 @@
 
           // Render scene
           this.renderer.render(this.scene, this.camera);
+        },
+
+        // New method for instanced rendering of very large amounts
+        createInstancedBillStacks(numBills) {
+          const billWidth = 1.56;
+          const billHeight = 0.663;
+          const billThickness = 0.0011;
+
+          // Each stack represents $10,000 (100 bills)
+          const billsPerStack = 100;
+          const numStacks = Math.ceil(numBills / billsPerStack);
+
+          // Calculate grid dimensions
+          const gridSize = Math.ceil(Math.sqrt(numStacks));
+          const spacing = Math.max(billWidth, billHeight) * 1.2;
+
+          // Create instanced mesh for stacks
+          const stackGeometry = new THREE.BoxGeometry(
+            billWidth,
+            billThickness * billsPerStack,
+            billHeight
+          );
+
+          // Simple material for all instances
+          const stackMaterial = [
+            new THREE.MeshStandardMaterial({
+              color: 0xcccccc,
+              roughness: 0.5,
+              metalness: 0.1,
+            }), // right
+            new THREE.MeshStandardMaterial({
+              color: 0xcccccc,
+              roughness: 0.5,
+              metalness: 0.1,
+            }), // left
+            new THREE.MeshStandardMaterial({
+              map: this.billTexture,
+              roughness: 0.5,
+              metalness: 0.1,
+            }), // top
+            new THREE.MeshStandardMaterial({
+              color: 0x85bb65,
+              roughness: 0.5,
+              metalness: 0.2,
+            }), // bottom
+            new THREE.MeshStandardMaterial({
+              color: 0xcccccc,
+              roughness: 0.5,
+              metalness: 0.1,
+            }), // front
+            new THREE.MeshStandardMaterial({
+              color: 0xcccccc,
+              roughness: 0.5,
+              metalness: 0.1,
+            }), // back
+          ];
+
+          const instancedMesh = new THREE.InstancedMesh(
+            stackGeometry,
+            stackMaterial,
+            numStacks
+          );
+
+          instancedMesh.castShadow = true;
+          instancedMesh.receiveShadow = true;
+          this.scene.add(instancedMesh);
+
+          // Create matrix for each instance
+          const matrix = new THREE.Matrix4();
+          const stackHeight = billThickness * billsPerStack;
+
+          for (let i = 0; i < numStacks; i++) {
+            const row = Math.floor(i / gridSize);
+            const col = i % gridSize;
+
+            const x = (col - gridSize / 2) * spacing;
+            const z = (row - gridSize / 2) * spacing;
+            const y = stackHeight / 2;
+
+            matrix.setPosition(x, y, z);
+            instancedMesh.setMatrixAt(i, matrix);
+          }
+
+          instancedMesh.instanceMatrix.needsUpdate = true;
+
+          // Store reference
+          this.bills.push({
+            mesh: instancedMesh,
+            billCount: numBills,
+            isVisualStack: true,
+            isInstanced: true,
+          });
+
+          // Update info
+          const formattedNumBills = numBills.toLocaleString();
+          const formattedAmount = (numBills * 100).toLocaleString();
+          this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount} (${numStacks.toLocaleString()} stacks using instanced rendering)`;
         },
       };
 
