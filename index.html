@@ -392,35 +392,22 @@
 
           // Each stack represents $10,000 (100 bills)
           const billsPerStack = 100;
-          const stackValue = 10000;
-          const numStacks = Math.ceil(amount / stackValue);
+          const numStacks = Math.ceil(numBills / billsPerStack);
 
-          // Calculate optimal grid dimensions to make width and depth similar
-          // and height approximately 2/3 of width/depth
+          // Calculate optimal grid dimensions
           const stackHeight = billThickness * billsPerStack;
-
-          // Calculate total volume needed
           const totalVolume = numStacks * billWidth * billHeight * stackHeight;
-
-          // If width ≈ depth and height = 2/3 * width, then:
-          // volume = width * depth * height ≈ width * width * (2/3 * width) = 2/3 * width³
-          // So width ≈ (volume * 3/2)^(1/3)
-
           const targetWidth = Math.pow(totalVolume * 1.5, 1 / 3);
 
-          // Calculate how many stacks we need in each dimension
-          // We want width ≈ depth, so we'll calculate based on the bill's aspect ratio
+          // Calculate grid dimensions based on bill aspect ratio
           const aspectRatio = billWidth / billHeight;
+          const targetRatio = Math.sqrt(aspectRatio);
 
           // Calculate grid dimensions (columns and rows)
-          // Since bills are wider than deep (billWidth > billHeight),
-          // we should have fewer stacks along X-axis than Z-axis to make the overall footprint more square
-          const targetRatio = Math.sqrt(aspectRatio);
           let gridX = Math.ceil(Math.sqrt(numStacks / targetRatio));
           let gridZ = Math.ceil(numStacks / gridX);
 
           // Calculate how many layers we need to achieve the target height
-          // Target height = 2/3 * targetWidth
           const targetHeight = (targetWidth * 2) / 3;
           const layersNeeded = Math.ceil(targetHeight / stackHeight);
 
@@ -435,37 +422,43 @@
           const spacingX = billWidth * 1.15; // Horizontal spacing with small gap
           const spacingZ = billHeight * 1.15; // Vertical spacing proportional to bill height
 
-          // Height of a full stack (100 bills)
-          const fullStackHeight = billThickness * billsPerStack;
-
           // Calculate stacks per layer
           const stacksPerLayer = gridX * gridZ;
           const numLayers = Math.ceil(numStacks / stacksPerLayer);
 
-          for (let i = 0; i < numStacks; i++) {
-            // Calculate how many bills in this stack (last stack might be partial)
-            const remainingAmount = amount - i * stackValue;
-            const stackBills = Math.min(billsPerStack, remainingAmount / 100);
+          // Pre-calculate all stack positions and bill counts
+          const stacks = [];
+          let remainingBills = numBills;
 
-            if (stackBills <= 0) break;
+          for (let layer = 0; layer < numLayers; layer++) {
+            for (let row = 0; row < gridZ; row++) {
+              for (let col = 0; col < gridX; col++) {
+                if (remainingBills <= 0) break;
 
-            // Calculate which layer this stack belongs to
-            const layer = Math.floor(i / stacksPerLayer);
+                // Calculate position
+                let offsetX = (col - (gridX - 1) / 2) * spacingX;
+                let offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
+                let offsetY = layer * stackHeight;
 
-            // Calculate position within the current layer's grid
-            const posInLayer = i % stacksPerLayer;
-            const row = Math.floor(posInLayer / gridX);
-            const col = posInLayer % gridX;
+                // Calculate bills in this stack
+                const stackBills = Math.min(billsPerStack, remainingBills);
+                remainingBills -= stackBills;
 
-            // Center the grid
-            let offsetX = (col - (gridX - 1) / 2) * spacingX;
-            let offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
+                stacks.push({
+                  x: offsetX,
+                  y: offsetY,
+                  z: offsetZ,
+                  bills: stackBills,
+                });
+              }
+              if (remainingBills <= 0) break;
+            }
+            if (remainingBills <= 0) break;
+          }
 
-            // Y position depends on the layer
-            let offsetY = layer * fullStackHeight;
-
-            // Create a visual stack without physics
-            this.createVisualStack(offsetX, offsetY, offsetZ, stackBills);
+          // Create all stacks at once
+          for (const stack of stacks) {
+            this.createVisualStack(stack.x, stack.y, stack.z, stack.bills);
           }
         },
 
