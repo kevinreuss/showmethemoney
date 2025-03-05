@@ -572,7 +572,23 @@
           let stacksCreated = 0;
           console.log(gridPositions);
 
+          // Calculate the bounds of the stacks
+          let minX = Infinity,
+            maxX = -Infinity;
+          let minZ = Infinity,
+            maxZ = -Infinity;
+          let maxY = 0;
+
           for (const [_, position] of gridPositions) {
+            minX = Math.min(minX, position.x - billWidth / 2);
+            maxX = Math.max(maxX, position.x + billWidth / 2);
+            minZ = Math.min(minZ, position.z - billHeight / 2);
+            maxZ = Math.max(maxZ, position.z + billHeight / 2);
+
+            // Calculate stack height
+            const stackHeight = position.bills * billThickness;
+            maxY = Math.max(maxY, stackHeight);
+
             this.createVisualStack(
               position.x,
               position.y,
@@ -585,6 +601,92 @@
 
           // Update info with stack count
           this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount} (${stacksCreated.toLocaleString()} stacks created)`;
+
+          // Adjust camera to fit all stacks with 10% margin
+          this.adjustCameraToFitStacks(minX, maxX, minZ, maxZ, maxY);
+        },
+
+        // New method to adjust camera position to fit all stacks with 10% margin
+        adjustCameraToFitStacks(minX, maxX, minZ, maxZ, maxY) {
+          // If there are no stacks, return to default position
+          if (minX === Infinity || maxX === -Infinity) {
+            this.camera.position.set(0, 10, 20);
+            this.camera.lookAt(0, 0, 0);
+            this.controls.target.set(0, 0, 0);
+            return;
+          }
+
+          // Calculate the center of the stacks
+          const centerX = (minX + maxX) / 2;
+          const centerZ = (minZ + maxZ) / 2;
+          const centerY = maxY / 2;
+
+          // Set the camera target to the center of the stacks
+          this.controls.target.set(centerX, centerY, centerZ);
+
+          // Calculate the size of the stacks
+          const width = maxX - minX;
+          const depth = maxZ - minZ;
+          const height = maxY;
+
+          // Calculate the distance needed to fit the stacks in the view with 10% margin
+          const fov = this.camera.fov * (Math.PI / 180);
+          const aspectRatio = this.camera.aspect;
+
+          // Apply a larger margin factor to zoom out further
+          // Using 1.8 instead of 1.25 will give much more space around the stacks
+          const marginFactor = 1.8;
+
+          // Calculate distances needed for each dimension
+          const fitHeightDistance =
+            (height * marginFactor) / (2 * Math.tan(fov / 2));
+          const fitWidthDistance =
+            (width * marginFactor) / (2 * Math.tan(fov / 2) * aspectRatio);
+          const fitDepthDistance =
+            (depth * marginFactor) / (2 * Math.tan(fov / 2));
+
+          // Use the maximum distance to ensure everything fits
+          const distance = Math.max(
+            fitHeightDistance,
+            fitWidthDistance,
+            fitDepthDistance
+          );
+
+          // Position the camera at a 45-degree angle
+          const cameraAngle = Math.PI / 4; // 45 degrees
+
+          // Calculate camera position
+          const cameraX = centerX - Math.sin(cameraAngle) * distance;
+          const cameraZ = centerZ - Math.cos(cameraAngle) * distance;
+
+          // Position camera slightly above the center for a better view
+          const cameraY = centerY + distance * 0.5;
+
+          // Set the camera position
+          this.camera.position.set(cameraX, cameraY, cameraZ);
+
+          // Update the controls
+          this.controls.update();
+
+          // Log camera positioning for debugging
+          console.log(
+            `Camera positioned at (${cameraX.toFixed(2)}, ${cameraY.toFixed(
+              2
+            )}, ${cameraZ.toFixed(2)})`
+          );
+          console.log(
+            `Target: (${centerX.toFixed(2)}, ${centerY.toFixed(
+              2
+            )}, ${centerZ.toFixed(2)})`
+          );
+          console.log(
+            `Stack dimensions: ${width.toFixed(2)} x ${height.toFixed(
+              2
+            )} x ${depth.toFixed(2)}`
+          );
+          console.log(
+            `Distance: ${distance.toFixed(2)}, Margin factor: ${marginFactor}`
+          );
         },
 
         // Create a visual stack of bills without physics - optimized version
