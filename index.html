@@ -385,30 +385,59 @@
 
           if (numBills <= 0) return;
 
-          // Create bills
+          // Bill dimensions
           const billWidth = 1.56;
           const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke
+          const billThickness = 0.0011;
 
           // Each stack represents $10,000 (100 bills)
           const billsPerStack = 100;
           const stackValue = 10000;
           const numStacks = Math.ceil(amount / stackValue);
 
-          // Maximum grid size: can be different for X and Y
-          const maxGridSizeX = 5; // Maximum columns
-          const maxGridSizeY = 10; // Maximum rows
+          // Calculate optimal grid dimensions to make width and depth similar
+          // and height approximately 2/3 of width/depth
+          const stackHeight = billThickness * billsPerStack;
 
-          // Base spacing on bill dimensions for a consistent look
-          let spacingX = billWidth * 1.15; // Horizontal spacing with small gap
-          let spacingZ = billHeight * 1.15; // Vertical spacing proportional to bill height
+          // Calculate total volume needed
+          const totalVolume = numStacks * billWidth * billHeight * stackHeight;
 
-          // Calculate how many stacks per layer
-          const stacksPerLayer = maxGridSizeX * maxGridSizeY;
-          const numLayers = Math.ceil(numStacks / stacksPerLayer);
+          // If width ≈ depth and height = 2/3 * width, then:
+          // volume = width * depth * height ≈ width * width * (2/3 * width) = 2/3 * width³
+          // So width ≈ (volume * 3/2)^(1/3)
+
+          const targetWidth = Math.pow(totalVolume * 1.5, 1 / 3);
+
+          // Calculate how many stacks we need in each dimension
+          // We want width ≈ depth, so we'll calculate based on the bill's aspect ratio
+          const aspectRatio = billWidth / billHeight;
+
+          // Calculate grid dimensions (columns and rows)
+          let gridX = Math.ceil(Math.sqrt(numStacks * aspectRatio));
+          let gridZ = Math.ceil(numStacks / gridX);
+
+          // Calculate how many layers we need to achieve the target height
+          // Target height = 2/3 * targetWidth
+          const targetHeight = (targetWidth * 2) / 3;
+          const layersNeeded = Math.ceil(targetHeight / stackHeight);
+
+          // Recalculate grid dimensions with layers
+          if (layersNeeded > 1) {
+            const stacksPerLayer = Math.ceil(numStacks / layersNeeded);
+            gridX = Math.ceil(Math.sqrt(stacksPerLayer * aspectRatio));
+            gridZ = Math.ceil(stacksPerLayer / gridX);
+          }
+
+          // Base spacing on bill dimensions
+          const spacingX = billWidth * 1.15; // Horizontal spacing with small gap
+          const spacingZ = billHeight * 1.15; // Vertical spacing proportional to bill height
 
           // Height of a full stack (100 bills)
           const fullStackHeight = billThickness * billsPerStack;
+
+          // Calculate stacks per layer
+          const stacksPerLayer = gridX * gridZ;
+          const numLayers = Math.ceil(numStacks / stacksPerLayer);
 
           for (let i = 0; i < numStacks; i++) {
             // Calculate how many bills in this stack (last stack might be partial)
@@ -422,23 +451,18 @@
 
             // Calculate position within the current layer's grid
             const posInLayer = i % stacksPerLayer;
-            const row = Math.floor(posInLayer / maxGridSizeX);
-            const col = posInLayer % maxGridSizeX;
+            const row = Math.floor(posInLayer / gridX);
+            const col = posInLayer % gridX;
 
             // Center the grid
-            let offsetX = (col - (maxGridSizeX - 1) / 2) * spacingX;
-            let offsetZ = (row - (maxGridSizeY - 1) / 2) * spacingZ;
+            let offsetX = (col - (gridX - 1) / 2) * spacingX;
+            let offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
 
             // Y position depends on the layer
             let offsetY = layer * fullStackHeight;
 
             // Create a visual stack without physics
-            this.createVisualStack(
-              offsetX,
-              offsetY, // Start at the appropriate layer height
-              offsetZ,
-              stackBills
-            );
+            this.createVisualStack(offsetX, offsetY, offsetZ, stackBills);
           }
         },
 
