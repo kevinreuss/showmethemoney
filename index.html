@@ -390,9 +390,16 @@
 
           // Check if we should use textures (disable for amounts >= 1 billion)
           const useTextures = amount < 1000000000;
-          if (!useTextures) {
+
+          // Determine if we should use detailed shadows based on number of stacks
+          // For large amounts, disable shadows to improve performance
+          const billsPerStack = 100;
+          const numStacks = Math.ceil(numBills / billsPerStack);
+          const useDetailedShadows = numStacks < 1000; // Only use detailed shadows for fewer than 1000 stacks
+
+          if (!useDetailedShadows) {
             console.log(
-              "Amount exceeds 1 billion dollars - disabling textures for better performance"
+              "Large amount detected - using simplified shadows for better performance"
             );
           }
 
@@ -400,10 +407,6 @@
           const billWidth = 1.56;
           const billHeight = 0.663;
           const billThickness = 0.0011;
-
-          // Each stack represents $10,000 (100 bills)
-          const billsPerStack = 100;
-          const numStacks = Math.ceil(numBills / billsPerStack);
 
           // Calculate optimal grid dimensions
           const stackHeight = billThickness * billsPerStack;
@@ -541,8 +544,14 @@
           ];
 
           const stackMesh = new THREE.Mesh(stackGeometry, materials);
-          stackMesh.castShadow = true;
-          stackMesh.receiveShadow = true;
+
+          // Determine if we should use detailed shadows based on number of stacks
+          const billsPerStack = 100;
+          const numStacks = Math.ceil(numBills / billsPerStack);
+          const useDetailedShadows = this.bills.length < 1000; // Only use detailed shadows for fewer than 1000 stacks
+
+          stackMesh.castShadow = useDetailedShadows;
+          stackMesh.receiveShadow = useDetailedShadows;
 
           // Position the mesh directly in the scene (no group)
           stackMesh.position.set(
