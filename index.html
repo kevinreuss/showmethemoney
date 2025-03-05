@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dollar Stack Visualizer</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        background-color: #f0f0f0;
+      }
+
+      #container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+
+      #controls {
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      #amount {
+        padding: 8px;
+        font-size: 16px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        width: 150px;
+      }
+
+      #render-btn {
+        padding: 8px 16px;
+        font-size: 16px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+
+      #render-btn:hover {
+        background-color: #45a049;
+      }
+
+      #info {
+        margin-left: 20px;
+        font-size: 16px;
+      }
+
+      #canvas-container {
+        flex: 1;
+        position: relative;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="controls">
+        <label for="amount">Amount in dollars:</label>
+        <input type="number" id="amount" min="0" step="100" value="1000" />
+        <button id="render-btn">Render</button>
+        <div id="info">Bills: 0</div>
+      </div>
+      <div id="canvas-container"></div>
+    </div>
+
+    <!-- Using older cannon.js instead of cannon-es -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+
+    <script>
+      // Main application
+      const app = {
+        // Scene setup
+        scene: null,
+        camera: null,
+        renderer: null,
+        controls: null,
+
+        // Physics
+        world: null,
+        timeStep: 1 / 60,
+
+        // Objects
+        bills: [],
+        billMesh: null,
+        billTexture: null,
+
+        // DOM elements
+        amountInput: document.getElementById("amount"),
+        renderBtn: document.getElementById("render-btn"),
+        infoElement: document.getElementById("info"),
+
+        // Initialize the application
+        init() {
+          this.setupThree();
+          this.setupPhysics();
+          this.setupLights();
+          this.setupGround();
+          this.loadBillTexture();
+          this.setupEventListeners();
+          this.animate();
+        },
+
+        // Set up Three.js scene, camera, renderer
+        setupThree() {
+          // Create scene
+          this.scene = new THREE.Scene();
+          this.scene.background = new THREE.Color(0xf0f0f0);
+
+          // Create camera
+          this.camera = new THREE.PerspectiveCamera(
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
+            1000
+          );
+          this.camera.position.set(0, 10, 20);
+
+          // Create renderer
+          this.renderer = new THREE.WebGLRenderer({ antialias: true });
+          this.renderer.setSize(window.innerWidth, window.innerHeight);
+          this.renderer.setPixelRatio(window.devicePixelRatio);
+          this.renderer.shadowMap.enabled = true;
+          document
+            .getElementById("canvas-container")
+            .appendChild(this.renderer.domElement);
+
+          // Add orbit controls
+          this.controls = new THREE.OrbitControls(
+            this.camera,
+            this.renderer.domElement
+          );
+          this.controls.enableDamping = true;
+          this.controls.dampingFactor = 0.05;
+
+          // Handle window resize
+          window.addEventListener("resize", () => {
+            this.camera.aspect = window.innerWidth / window.innerHeight;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+          });
+
+          // Setup raycaster for interaction
+          this.raycaster = new THREE.Raycaster();
+          this.mouse = new THREE.Vector2();
+          this.selectedBill = null;
+          this.intersectedBill = null;
+
+          this.renderer.domElement.addEventListener(
+            "mousemove",
+            this.onMouseMove.bind(this)
+          );
+          this.renderer.domElement.addEventListener(
+            "mousedown",
+            this.onMouseDown.bind(this)
+          );
+          this.renderer.domElement.addEventListener(
+            "mouseup",
+            this.onMouseUp.bind(this)
+          );
+        },
+
+        // Set up physics world
+        setupPhysics() {
+          // Using old Cannon.js syntax
+          this.world = new CANNON.World();
+          this.world.gravity.set(0, -9.82, 0);
+          this.world.broadphase = new CANNON.NaiveBroadphase();
+          this.world.solver.iterations = 10;
+          this.world.allowSleep = true;
+        },
+
+        // Set up lights
+        setupLights() {
+          // Ambient light
+          const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+          this.scene.add(ambientLight);
+
+          // Directional light (sun)
+          const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+          directionalLight.position.set(10, 20, 10);
+          directionalLight.castShadow = true;
+          directionalLight.shadow.mapSize.width = 2048;
+          directionalLight.shadow.mapSize.height = 2048;
+          directionalLight.shadow.camera.near = 0.5;
+          directionalLight.shadow.camera.far = 50;
+          directionalLight.shadow.camera.left = -20;
+          directionalLight.shadow.camera.right = 20;
+          directionalLight.shadow.camera.top = 20;
+          directionalLight.shadow.camera.bottom = -20;
+          this.scene.add(directionalLight);
+        },
+
+        // Set up ground plane
+        setupGround() {
+          // Three.js ground
+          const groundGeometry = new THREE.PlaneGeometry(50, 50);
+          const groundMaterial = new THREE.MeshStandardMaterial({
+            color: 0x999999,
+            roughness: 0.8,
+            metalness: 0.2,
+          });
+          const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+          ground.rotation.x = -Math.PI / 2;
+          ground.receiveShadow = true;
+          this.scene.add(ground);
+
+          // Cannon.js ground - updated for old Cannon.js syntax
+          const groundShape = new CANNON.Plane();
+          const groundBody = new CANNON.Body({
+            mass: 0,
+          });
+          groundBody.addShape(groundShape);
+          groundBody.quaternion.setFromAxisAngle(
+            new CANNON.Vec3(1, 0, 0),
+            -Math.PI / 2
+          );
+          this.world.addBody(groundBody);
+        },
+
+        // Load bill texture
+        loadBillTexture() {
+          const textureLoader = new THREE.TextureLoader();
+          this.billTexture = textureLoader.load(
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Usdollar100front.jpg/800px-Usdollar100front.jpg"
+          );
+
+          // Create bill geometry (100 dollar bill dimensions: 156mm x 66.3mm x 0.11mm)
+          // Scale up thickness for better physics and visibility
+          const billWidth = 1.56;
+          const billHeight = 0.663;
+          const billThickness = 0.02;
+
+          const billGeometry = new THREE.BoxGeometry(
+            billWidth,
+            billThickness,
+            billHeight
+          );
+
+          // Create materials for the bill
+          const frontMaterial = new THREE.MeshStandardMaterial({
+            map: this.billTexture,
+          });
+          const backMaterial = new THREE.MeshStandardMaterial({
+            color: 0x85bb65,
+            roughness: 0.5,
+            metalness: 0.2,
+          });
+          const edgeMaterial = new THREE.MeshStandardMaterial({
+            color: 0xcccccc,
+            roughness: 0.5,
+            metalness: 0.1,
+          });
+
+          const materials = [
+            edgeMaterial, // right side
+            edgeMaterial, // left side
+            frontMaterial, // top (front of bill)
+            backMaterial, // bottom (back of bill)
+            edgeMaterial, // front edge
+            edgeMaterial, // back edge
+          ];
+
+          this.billMesh = new THREE.Mesh(billGeometry, materials);
+          this.billMesh.castShadow = true;
+          this.billMesh.receiveShadow = true;
+        },
+
+        // Set up event listeners
+        setupEventListeners() {
+          this.renderBtn.addEventListener("click", this.renderBills.bind(this));
+        },
+
+        // Render bills based on input amount
+        renderBills() {
+          // Clear existing bills
+          this.clearBills();
+
+          // Get amount and round to nearest $100
+          let amount = parseFloat(this.amountInput.value);
+          if (isNaN(amount)) amount = 0;
+
+          // Round to nearest $100
+          amount = Math.round(amount / 100) * 100;
+          this.amountInput.value = amount;
+
+          // Calculate number of bills
+          const numBills = amount / 100;
+          this.infoElement.textContent = `Bills: ${numBills}`;
+
+          if (numBills <= 0) return;
+
+          // Create bills
+          const billWidth = 1.56;
+          const billHeight = 0.663;
+          const billThickness = 0.02;
+
+          // Determine stack configuration
+          let stackSize = Math.min(20, numBills); // Max 20 bills per stack
+          let numStacks = Math.ceil(numBills / stackSize);
+
+          // Calculate grid layout
+          let gridSize = Math.ceil(Math.sqrt(numStacks));
+          let spacing = 2.5;
+
+          let billsCreated = 0;
+
+          for (let i = 0; i < numStacks; i++) {
+            if (billsCreated >= numBills) break;
+
+            // Calculate position in grid
+            let row = Math.floor(i / gridSize);
+            let col = i % gridSize;
+
+            let offsetX = (col - (gridSize - 1) / 2) * spacing;
+            let offsetZ =
+              (row - (Math.ceil(numStacks / gridSize) - 1) / 2) * spacing;
+
+            // Create stack at this position
+            let stackHeight = Math.min(stackSize, numBills - billsCreated);
+
+            for (let j = 0; j < stackHeight; j++) {
+              this.createBill(
+                offsetX,
+                billThickness / 2 + j * billThickness,
+                offsetZ
+              );
+              billsCreated++;
+            }
+          }
+        },
+
+        // Create a single bill
+        createBill(x, y, z) {
+          // Create Three.js mesh
+          const bill = this.billMesh.clone();
+          bill.position.set(x, y, z);
+
+          // Add slight random rotation for realism
+          bill.rotation.set(
+            (Math.random() - 0.5) * 0.05,
+            (Math.random() - 0.5) * 0.05,
+            (Math.random() - 0.5) * 0.05
+          );
+
+          this.scene.add(bill);
+
+          // Create Cannon.js body - updated for old Cannon.js syntax
+          const billShape = new CANNON.Box(
+            new CANNON.Vec3(
+              1.56 / 2, // half width
+              0.02 / 2, // half height (thickness)
+              0.663 / 2 // half depth
+            )
+          );
+
+          const billBody = new CANNON.Body({
+            mass: 0.1, // 100 dollar bill weighs about 1 gram
+          });
+          billBody.addShape(billShape);
+          billBody.position.set(x, y, z);
+
+          // Create material with friction and restitution
+          const billMaterial = new CANNON.Material();
+          billMaterial.friction = 0.3;
+          billMaterial.restitution = 0.3;
+          billBody.material = billMaterial;
+
+          // Apply the same rotation
+          billBody.quaternion.setFromEuler(
+            bill.rotation.x,
+            bill.rotation.y,
+            bill.rotation.z
+          );
+
+          this.world.addBody(billBody);
+
+          // Store reference to both the mesh and body
+          this.bills.push({
+            mesh: bill,
+            body: billBody,
+          });
+        },
+
+        // Clear all bills
+        clearBills() {
+          for (const bill of this.bills) {
+            this.scene.remove(bill.mesh);
+            this.world.removeBody(bill.body);
+          }
+          this.bills = [];
+        },
+
+        // Mouse interaction handlers
+        onMouseMove(event) {
+          // Calculate mouse position in normalized device coordinates
+          this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+          this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          // Handle dragging
+          if (this.selectedBill) {
+            this.raycaster.setFromCamera(this.mouse, this.camera);
+            const planeIntersection = new THREE.Vector3();
+            const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+            this.raycaster.ray.intersectPlane(dragPlane, planeIntersection);
+
+            // Move the bill to follow the mouse
+            this.selectedBill.body.position.x = planeIntersection.x;
+            this.selectedBill.body.position.z = planeIntersection.z;
+            this.selectedBill.body.velocity.set(0, 0, 0);
+            this.selectedBill.body.angularVelocity.set(0, 0, 0);
+          }
+        },
+
+        onMouseDown(event) {
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+          const intersects = this.raycaster.intersectObjects(
+            this.bills.map((bill) => bill.mesh)
+          );
+
+          if (intersects.length > 0) {
+            this.controls.enabled = false;
+            const selectedMesh = intersects[0].object;
+            this.selectedBill = this.bills.find(
+              (bill) => bill.mesh === selectedMesh
+            );
+
+            if (this.selectedBill) {
+              // Apply upward force when clicked
+              this.selectedBill.body.velocity.set(0, 5, 0);
+              this.selectedBill.body.angularVelocity.set(
+                (Math.random() - 0.5) * 5,
+                (Math.random() - 0.5) * 5,
+                (Math.random() - 0.5) * 5
+              );
+            }
+          }
+        },
+
+        onMouseUp() {
+          this.controls.enabled = true;
+          this.selectedBill = null;
+        },
+
+        // Animation loop
+        animate() {
+          requestAnimationFrame(this.animate.bind(this));
+
+          // Update physics
+          this.world.step(this.timeStep);
+
+          // Update meshes to match physics bodies
+          for (const bill of this.bills) {
+            bill.mesh.position.copy(bill.body.position);
+            bill.mesh.quaternion.copy(bill.body.quaternion);
+          }
+
+          // Update controls
+          this.controls.update();
+
+          // Render scene
+          this.renderer.render(this.scene, this.camera);
+        },
+      };
+
+      // Initialize when the page loads
+      window.addEventListener("load", () => {
+        app.init();
+      });
+    </script>
+  </body>
+</html>
