@@ -73,7 +73,7 @@
     <div id="container">
       <div id="controls">
         <label for="amount">Amount in dollars:</label>
-        <input type="number" id="amount" min="0" step="100" value="1000" />
+        <input type="number" id="amount" min="0" step="100" value="100000" />
         <button id="render-btn">Render</button>
         <div id="info">Bills: 0</div>
       </div>
@@ -163,19 +163,6 @@
           this.mouse = new THREE.Vector2();
           this.selectedBill = null;
           this.intersectedBill = null;
-
-          this.renderer.domElement.addEventListener(
-            "mousemove",
-            this.onMouseMove.bind(this)
-          );
-          this.renderer.domElement.addEventListener(
-            "mousedown",
-            this.onMouseDown.bind(this)
-          );
-          this.renderer.domElement.addEventListener(
-            "mouseup",
-            this.onMouseUp.bind(this)
-          );
         },
 
         // Set up physics world
@@ -240,7 +227,31 @@
         loadBillTexture() {
           const textureLoader = new THREE.TextureLoader();
           this.billTexture = textureLoader.load(
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Usdollar100front.jpg/800px-Usdollar100front.jpg"
+            "https://i.imgur.com/bXur10d.jpg",
+            // Add onLoad callback to handle texture loading
+            () => {
+              console.log("Texture loaded successfully");
+              // Force material update
+              if (Array.isArray(this.billMesh.material)) {
+                this.billMesh.material.forEach((mat) => {
+                  if (mat.map) mat.needsUpdate = true;
+                });
+              }
+            },
+            // Add onProgress callback (optional)
+            undefined,
+            // Add onError callback
+            (err) => {
+              console.error("Error loading texture:", err);
+              // Fallback to a green color if texture fails
+              if (Array.isArray(this.billMesh.material)) {
+                this.billMesh.material[2] = new THREE.MeshStandardMaterial({
+                  color: 0x85bb65,
+                  roughness: 0.5,
+                  metalness: 0.1,
+                });
+              }
+            }
           );
 
           // Create bill geometry (100 dollar bill dimensions: 156mm x 66.3mm x 0.11mm)
@@ -258,6 +269,8 @@
           // Create materials for the bill
           const frontMaterial = new THREE.MeshStandardMaterial({
             map: this.billTexture,
+            roughness: 0.5,
+            metalness: 0.1,
           });
           const backMaterial = new THREE.MeshStandardMaterial({
             color: 0x85bb65,
@@ -287,6 +300,81 @@
         // Set up event listeners
         setupEventListeners() {
           this.renderBtn.addEventListener("click", this.renderBills.bind(this));
+
+          // Use mousedown for bill selection
+          this.renderer.domElement.addEventListener("mousedown", (event) => {
+            if (event.button === 0) {
+              // Left mouse button
+              this.handleBillSelection(event);
+            }
+          });
+
+          // Use mousemove for bill dragging
+          this.renderer.domElement.addEventListener("mousemove", (event) => {
+            if (this.selectedBill) {
+              this.handleBillDragging(event);
+            }
+          });
+
+          // Use mouseup to release bill
+          this.renderer.domElement.addEventListener("mouseup", (event) => {
+            if (event.button === 0) {
+              // Left mouse button
+              this.selectedBill = null;
+              this.controls.enabled = true;
+            }
+          });
+        },
+
+        handleBillSelection(event) {
+          // Calculate mouse position
+          this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+          this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+          const intersects = this.raycaster.intersectObjects(
+            this.bills.map((bill) => bill.mesh)
+          );
+
+          if (intersects.length > 0) {
+            // Disable orbit controls when a bill is selected
+            this.controls.enabled = false;
+
+            // Find the bill that was clicked
+            const selectedMesh = intersects[0].object;
+            for (const bill of this.bills) {
+              if (
+                bill.mesh === selectedMesh ||
+                bill.mesh.id === selectedMesh.id
+              ) {
+                this.selectedBill = bill;
+                console.log("Bill selected!");
+                break;
+              }
+            }
+          }
+        },
+
+        handleBillDragging(event) {
+          // Calculate mouse position
+          this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+          this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+          this.raycaster.setFromCamera(this.mouse, this.camera);
+          const planeIntersection = new THREE.Vector3();
+          const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+          this.raycaster.ray.intersectPlane(dragPlane, planeIntersection);
+
+          // Move the bill to follow the mouse
+          this.selectedBill.body.position.x = planeIntersection.x;
+          this.selectedBill.body.position.z = planeIntersection.z;
+          this.selectedBill.body.position.y = Math.max(
+            0.1,
+            planeIntersection.y
+          );
+          this.selectedBill.body.velocity.set(0, 0, 0);
+          this.selectedBill.body.angularVelocity.set(0, 0, 0);
+          this.selectedBill.body.wakeUp();
         },
 
         // Render bills based on input amount
@@ -407,57 +495,6 @@
             this.world.removeBody(bill.body);
           }
           this.bills = [];
-        },
-
-        // Mouse interaction handlers
-        onMouseMove(event) {
-          // Calculate mouse position in normalized device coordinates
-          this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-          this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-          // Handle dragging
-          if (this.selectedBill) {
-            this.raycaster.setFromCamera(this.mouse, this.camera);
-            const planeIntersection = new THREE.Vector3();
-            const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-            this.raycaster.ray.intersectPlane(dragPlane, planeIntersection);
-
-            // Move the bill to follow the mouse
-            this.selectedBill.body.position.x = planeIntersection.x;
-            this.selectedBill.body.position.z = planeIntersection.z;
-            this.selectedBill.body.velocity.set(0, 0, 0);
-            this.selectedBill.body.angularVelocity.set(0, 0, 0);
-          }
-        },
-
-        onMouseDown(event) {
-          this.raycaster.setFromCamera(this.mouse, this.camera);
-          const intersects = this.raycaster.intersectObjects(
-            this.bills.map((bill) => bill.mesh)
-          );
-
-          if (intersects.length > 0) {
-            this.controls.enabled = false;
-            const selectedMesh = intersects[0].object;
-            this.selectedBill = this.bills.find(
-              (bill) => bill.mesh === selectedMesh
-            );
-
-            if (this.selectedBill) {
-              // Apply upward force when clicked
-              this.selectedBill.body.velocity.set(0, 5, 0);
-              this.selectedBill.body.angularVelocity.set(
-                (Math.random() - 0.5) * 5,
-                (Math.random() - 0.5) * 5,
-                (Math.random() - 0.5) * 5
-              );
-            }
-          }
-        },
-
-        onMouseUp() {
-          this.controls.enabled = true;
-          this.selectedBill = null;
         },
 
         // Animation loop
