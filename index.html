@@ -121,7 +121,7 @@
 
         // DOM elements
         amountSelect: document.getElementById("amount-select"),
-        renderBtn: document.getElementById("render-btn"),
+        // renderBtn: document.getElementById("render-btn"),
         infoElement: document.getElementById("info"),
 
         // Initialize the application
@@ -321,7 +321,7 @@
 
         // Set up event listeners
         setupEventListeners() {
-          this.renderBtn.addEventListener("click", this.renderBills.bind(this));
+          // this.renderBtn.addEventListener("click", this.renderBills.bind(this));
           this.amountSelect.addEventListener(
             "change",
             this.renderBills.bind(this)
