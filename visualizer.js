@@ -532,12 +532,11 @@ const app = {
     const depth = maxZ - minZ;
     const height = maxY;
 
-    // Calculate the distance needed to fit the stacks in the view with 10% margin
+    // Calculate the distance needed to fit the stacks in the view with margin
     const fov = this.camera.fov * (Math.PI / 180);
     const aspectRatio = this.camera.aspect;
 
     // Apply a larger margin factor to zoom out further
-    // Using 1.8 instead of 1.25 will give much more space around the stacks
     const marginFactor = 1.8;
 
     // Calculate distances needed for each dimension
@@ -553,8 +552,9 @@ const app = {
       fitDepthDistance
     );
 
-    // Position the camera at a 45-degree angle
-    const cameraAngle = Math.PI / 4; // 45 degrees
+    // Position the camera at a different angle (from lower left)
+    // Changed from 45 degrees to about 135 degrees (Math.PI * 3/4)
+    const cameraAngle = (Math.PI * 3) / 4; // 135 degrees
 
     // Calculate camera position
     const cameraX = centerX - Math.sin(cameraAngle) * distance;
