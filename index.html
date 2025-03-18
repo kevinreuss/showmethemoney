@@ -735,13 +735,7 @@
     <footer>
       <div class="footer-container">
         <div class="footer-left">
-          <a href="legal.html" class="legal-link">Legal</a>
-          <a
-            href="mailto:kevreuss@gmail.com"
-            class="legal-link"
-            style="margin-left: 1rem"
-            >Feedback?</a
-          >
+          <!-- This div is now empty but kept for structure -->
         </div>
         <div class="footer-center">
           <button class="share-picture-btn" id="share-picture-btn">
@@ -749,6 +743,13 @@
           </button>
         </div>
         <div class="footer-right">
+          <a href="legal.html" class="legal-link">Legal</a>
+          <a
+            href="mailto:kevreuss@gmail.com"
+            class="legal-link"
+            style="margin-left: 1rem"
+            >Feedback?</a
+          >
           <a
             href="https://x.com/cash_stack_com"
             target="_blank"
@@ -768,6 +769,17 @@
         </div>
       </div>
     </footer>
+
+    <!-- Ko-fi Widget -->
+    <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+    <script>
+      kofiWidgetOverlay.draw("kevreuss", {
+        type: "floating-chat",
+        "floating-chat.donateButton.text": "Support me",
+        "floating-chat.donateButton.background-color": "#323842",
+        "floating-chat.donateButton.text-color": "#fff",
+      });
+    </script>
 
     <!-- Modal for selecting amounts -->
     <div class="modal-overlay" id="amount-modal">
