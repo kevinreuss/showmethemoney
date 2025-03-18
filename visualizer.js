@@ -900,7 +900,7 @@ const app = {
         boundingBox.getSize(modelSize);
 
         // Scale the model to match the specified height
-        const scale = selectedObject.height / modelSize.y;
+        const scale = (selectedObject.height * 10) / modelSize.y;
         model.scale.set(scale, scale, scale);
 
         // Recalculate bounding box after scaling
