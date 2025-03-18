@@ -1094,7 +1094,7 @@ const app = {
     const aspectRatio = this.camera.aspect;
 
     // Apply a larger margin factor to zoom out further
-    const marginFactor = 1.8;
+    const marginFactor = 2.5;
 
     // Calculate distances needed for each dimension
     const fitHeightDistance = (size.y * marginFactor) / (2 * Math.tan(fov / 2));
