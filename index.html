@@ -584,17 +584,6 @@
           modelPath: "models/tesla.glb",
         },
         {
-          id: "schoolbus",
-          title: "School Bus",
-          description: "Standard American school bus",
-          height: 3.2, // meters
-          width: 2.44, // meters
-          depth: 12.2, // meters (length)
-          image:
-            "https://images.unsplash.com/photo-1557223562-6c77ef16210f?q=80&w=2070&auto=format&fit=crop",
-          modelPath: "models/schoolbus.glb",
-        },
-        {
           id: "house",
           title: "Single Family House",
           description: "Average two-story house",
@@ -626,39 +615,6 @@
           image:
             "https://images.unsplash.com/photo-1605130284535-11dd9eedc58a?q=80&w=1964&auto=format&fit=crop",
           modelPath: "models/liberty.glb",
-        },
-        {
-          id: "eiffel",
-          title: "Eiffel Tower",
-          description: "Iconic Paris landmark",
-          height: 330, // meters
-          width: 125, // meters (base width)
-          depth: 125, // meters (base depth)
-          image:
-            "https://images.unsplash.com/photo-1543349689-9a4d426bee8e?q=80&w=2001&auto=format&fit=crop",
-          modelPath: "models/eiffel.glb",
-        },
-        {
-          id: "empire",
-          title: "Empire State Building",
-          description: "Famous New York skyscraper",
-          height: 443.2, // meters (including antenna)
-          width: 57.3, // meters
-          depth: 86.9, // meters
-          image:
-            "https://images.unsplash.com/photo-1555109307-f7d9da25c244?q=80&w=1973&auto=format&fit=crop",
-          modelPath: "models/empire.glb",
-        },
-        {
-          id: "burj",
-          title: "Burj Khalifa",
-          description: "World's tallest building",
-          height: 828, // meters
-          width: 49, // meters (at base)
-          depth: 70, // meters (at base)
-          image:
-            "https://images.unsplash.com/photo-1582672060674-bc2bd808a8f5?q=80&w=1974&auto=format&fit=crop",
-          modelPath: "models/burj.glb",
         },
       ];
 
@@ -835,9 +791,7 @@
             // Update the amount select element for visualizer.js
             const amountSelect = document.getElementById("amount-select");
             if (amountSelect) {
-              // Clear existing options
               amountSelect.innerHTML = "";
-              // Add new option
               const option = document.createElement("option");
               option.value = newAmount;
               option.textContent = `$${formatNumber(newAmount)}`;
@@ -848,9 +802,12 @@
               amountSelect.dispatchEvent(event);
             }
 
-            // Call the visualizer with the new amount if it has a direct method
-            if (app && typeof app.renderBills === "function") {
+            // First render the bills, then reposition the comparison object
+            if (app) {
               app.renderBills();
+              if (currentComparisonId !== "none") {
+                app.loadComparisonObject(currentComparisonId);
+              }
             }
 
             amountModal.classList.remove("active");
@@ -889,8 +846,9 @@
               comparisonBtn.textContent = `Comparing: ${selectedObject.title}`;
             }
 
-            // Call the visualizer to load the comparison object
-            if (app && typeof app.loadComparisonObject === "function") {
+            // First ensure bills are rendered, then add comparison object
+            if (app) {
+              app.renderBills();
               app.loadComparisonObject(currentComparisonId);
             }
 

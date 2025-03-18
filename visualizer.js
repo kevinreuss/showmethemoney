@@ -961,29 +961,29 @@ const app = {
     this.positionComparisonModel(model);
 
     // Add text label with the object name and actual height
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    canvas.width = 512;
-    canvas.height = 128;
-    context.fillStyle = "white";
-    context.font = "bold 36px Arial";
-    context.fillText(objectData.title, 10, 64);
-    context.font = "24px Arial";
-    context.fillText(`Height: ${height}m`, 10, 100);
+    // const canvas = document.createElement("canvas");
+    // const context = canvas.getContext("2d");
+    // canvas.width = 512;
+    // canvas.height = 128;
+    // context.fillStyle = "white";
+    // context.font = "bold 36px Arial";
+    // context.fillText(objectData.title, 10, 64);
+    // context.font = "24px Arial";
+    // context.fillText(`Height: ${height}m`, 10, 100);
 
-    const texture = new THREE.CanvasTexture(canvas);
-    const labelMaterial = new THREE.MeshBasicMaterial({
-      map: texture,
-      transparent: true,
-      side: THREE.DoubleSide,
-    });
+    // const texture = new THREE.CanvasTexture(canvas);
+    // const labelMaterial = new THREE.MeshBasicMaterial({
+    //   map: texture,
+    //   transparent: true,
+    //   side: THREE.DoubleSide,
+    // });
 
-    const labelGeometry = new THREE.PlaneGeometry(width * 2, width * 0.5);
-    const label = new THREE.Mesh(labelGeometry, labelMaterial);
-    label.position.set(0, height + 0.2, 0); // Position label just above the object
-    label.rotation.x = -Math.PI / 4;
+    // const labelGeometry = new THREE.PlaneGeometry(width * 2, width * 0.5);
+    // const label = new THREE.Mesh(labelGeometry, labelMaterial);
+    // label.position.set(0, height + 0.2, 0); // Position label just above the object
+    // label.rotation.x = -Math.PI / 4;
 
-    model.add(label);
+    // model.add(label);
 
     // Add to scene
     this.comparisonModel = model;
