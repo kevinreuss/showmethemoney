@@ -169,7 +169,7 @@ const app = {
       "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Usdollar100front.jpg/2560px-Usdollar100front.jpg",
       // Add onLoad callback to handle texture loading
       () => {
-        console.log("Texture loaded successfully");
+        console.log("Dollar Texture loaded successfully");
       },
       // Add onProgress callback (optional)
       undefined,
@@ -225,7 +225,7 @@ const app = {
   // Set up event listeners
   setupEventListeners() {
     // this.renderBtn.addEventListener("click", this.renderBills.bind(this));
-    this.amountSelect.addEventListener("change", this.renderBills.bind(this));
+    // this.amountSelect.addEventListener("change", this.renderBills.bind(this));
 
     // Use mousedown for bill selection
     this.renderer.domElement.addEventListener("mousedown", (event) => {
@@ -328,9 +328,9 @@ const app = {
     const useDetailedShadows = numStacks < 1000; // Only use detailed shadows for fewer than 1000 stacks
 
     if (!useDetailedShadows) {
-      console.log(
-        "Large amount detected - using simplified shadows for better performance"
-      );
+      // console.log(
+      //   "Large amount detected - using simplified shadows for better performance"
+      // );
     }
 
     // Create shared geometry and materials for all stacks
@@ -409,8 +409,13 @@ const app = {
     const targetRatio = Math.sqrt(aspectRatio);
 
     // Calculate grid dimensions (columns and rows)
-    let gridX = Math.ceil(Math.sqrt(numStacks / targetRatio));
-    let gridZ = Math.ceil(numStacks / gridX);
+    const maxGridX = 100;
+    const maxGridZ = 100;
+    let gridX = Math.min(
+      Math.ceil(Math.sqrt(numStacks / targetRatio)),
+      maxGridX
+    );
+    let gridZ = Math.min(Math.ceil(numStacks / gridX), maxGridZ);
 
     // Calculate how many layers we need to achieve the target height
     const targetHeight = (targetWidth * 2) / 3;
@@ -419,8 +424,11 @@ const app = {
     // Recalculate grid dimensions with layers
     if (layersNeeded > 1) {
       const stacksPerLayer = Math.ceil(numStacks / layersNeeded);
-      gridX = Math.ceil(Math.sqrt(stacksPerLayer / targetRatio));
-      gridZ = Math.ceil(stacksPerLayer / gridX);
+      gridX = Math.min(
+        Math.ceil(Math.sqrt(stacksPerLayer / targetRatio)),
+        maxGridX
+      );
+      gridZ = Math.min(Math.ceil(stacksPerLayer / gridX), maxGridZ);
     }
 
     // Base spacing on bill dimensions
@@ -436,6 +444,8 @@ const app = {
     let remainingBills = numBills;
 
     // Distribute bills to grid positions
+    console.log("start");
+
     for (let layer = 0; layer < numLayers; layer++) {
       for (let row = 0; row < gridZ; row++) {
         for (let col = 0; col < gridX; col++) {
@@ -471,9 +481,10 @@ const app = {
       if (remainingBills <= 0) break;
     }
 
+    console.log("finish");
+
     // Create stacks for each grid position
     let stacksCreated = 0;
-    console.log(gridPositions);
 
     // Calculate the bounds of the stacks
     let minX = Infinity,
@@ -570,24 +581,24 @@ const app = {
     this.controls.update();
 
     // Log camera positioning for debugging
-    console.log(
-      `Camera positioned at (${cameraX.toFixed(2)}, ${cameraY.toFixed(
-        2
-      )}, ${cameraZ.toFixed(2)})`
-    );
-    console.log(
-      `Target: (${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(
-        2
-      )})`
-    );
-    console.log(
-      `Stack dimensions: ${width.toFixed(2)} x ${height.toFixed(
-        2
-      )} x ${depth.toFixed(2)}`
-    );
-    console.log(
-      `Distance: ${distance.toFixed(2)}, Margin factor: ${marginFactor}`
-    );
+    // console.log(
+    //   `Camera positioned at (${cameraX.toFixed(2)}, ${cameraY.toFixed(
+    //     2
+    //   )}, ${cameraZ.toFixed(2)})`
+    // );
+    // console.log(
+    //   `Target: (${centerX.toFixed(2)}, ${centerY.toFixed(2)}, ${centerZ.toFixed(
+    //     2
+    //   )})`
+    // );
+    // console.log(
+    //   `Stack dimensions: ${width.toFixed(2)} x ${height.toFixed(
+    //     2
+    //   )} x ${depth.toFixed(2)}`
+    // );
+    // console.log(
+    //   `Distance: ${distance.toFixed(2)}, Margin factor: ${marginFactor}`
+    // );
   },
 
   // Create a visual stack of bills without physics - optimized version
@@ -843,7 +854,7 @@ const app = {
     }
 
     // Call the existing renderBills method
-    this.renderBills();
+    // this.renderBills();
   },
 };
 
