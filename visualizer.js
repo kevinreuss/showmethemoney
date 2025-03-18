@@ -23,6 +23,11 @@ const app = {
   // renderBtn: document.getElementById("render-btn"),
   infoElement: document.getElementById("info"),
 
+  // Add these properties to the app object at the top
+  comparisonObject: null,
+  comparisonModel: null,
+  comparisonBoundingBox: null,
+
   // Initialize the application
   init() {
     this.setupThree();
@@ -37,6 +42,9 @@ const app = {
     this.renderBills();
 
     this.animate();
+
+    // Initialize comparison features
+    initComparisonFeatures();
   },
 
   // Set up Three.js scene, camera, renderer
@@ -512,8 +520,8 @@ const app = {
     // Update info with stack count
     // this.infoElement.textContent = `${formattedNumBills} x 100$ = $${formattedAmount}`;
 
-    // Adjust camera to fit all stacks with 10% margin
-    this.adjustCameraToFitStacks(minX, maxX, minZ, maxZ, maxY);
+    // Adjust camera to fit all stacks and comparison object
+    this.adjustCameraToFitScene();
   },
 
   // New method to adjust camera position to fit all stacks with 10% margin
@@ -851,6 +859,259 @@ const app = {
 
     // Call the existing renderBills method
     // this.renderBills();
+  },
+
+  // Add this method to load and position comparison objects
+  loadComparisonObject(objectId) {
+    // Remove any existing comparison object
+    if (this.comparisonModel) {
+      this.scene.remove(this.comparisonModel);
+      this.comparisonModel = null;
+      this.comparisonBoundingBox = null;
+      this.comparisonObject = null;
+    }
+
+    // If "none" is selected, just return
+    if (!objectId || objectId === "none") {
+      // Adjust camera to focus only on bills
+      this.adjustCameraToFitScene();
+      return;
+    }
+
+    // Find the selected comparison object
+    const selectedObject = comparisonObjects.find((obj) => obj.id === objectId);
+    if (!selectedObject || !selectedObject.modelPath) {
+      console.error("Invalid comparison object or missing model path");
+      return;
+    }
+
+    this.comparisonObject = selectedObject;
+
+    // Load the 3D model
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+      selectedObject.modelPath,
+      (gltf) => {
+        const model = gltf.scene;
+
+        // Calculate the bounding box of the model
+        const boundingBox = new THREE.Box3().setFromObject(model);
+        const modelSize = new THREE.Vector3();
+        boundingBox.getSize(modelSize);
+
+        // Scale the model to match the specified height
+        const scale = selectedObject.height / modelSize.y;
+        model.scale.set(scale, scale, scale);
+
+        // Recalculate bounding box after scaling
+        const scaledBoundingBox = new THREE.Box3().setFromObject(model);
+        this.comparisonBoundingBox = scaledBoundingBox;
+
+        // Position the model next to the money stacks
+        this.positionComparisonModel(model);
+
+        // Add to scene
+        this.comparisonModel = model;
+        this.scene.add(model);
+
+        // Adjust camera to fit both objects
+        this.adjustCameraToFitScene();
+
+        console.log(`Loaded comparison object: ${selectedObject.title}`);
+      },
+      (xhr) => {
+        console.log(
+          `${selectedObject.title} model: ${
+            (xhr.loaded / xhr.total) * 100
+          }% loaded`
+        );
+      },
+      (error) => {
+        console.error(`Error loading ${selectedObject.title} model:`, error);
+        // Create a simple placeholder if model fails to load
+        this.createSimpleComparisonObject(selectedObject);
+      }
+    );
+  },
+
+  // Create a simple placeholder for comparison objects
+  createSimpleComparisonObject(objectData) {
+    // Get the height in meters (already in correct scale)
+    const height = objectData.height * 10;
+    const width = objectData.width * 10;
+    const depth = objectData.depth * 10; // Square base for simplicity
+
+    const geometry = new THREE.BoxGeometry(width, height, depth);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x3366ff,
+      transparent: true,
+      opacity: 0.7,
+    });
+
+    const model = new THREE.Mesh(geometry, material);
+
+    // Position the box at half its height (so bottom is at y=0)
+    model.position.y = height / 2;
+
+    // Calculate bounding box
+    const boundingBox = new THREE.Box3().setFromObject(model);
+    this.comparisonBoundingBox = boundingBox;
+
+    // Position the model next to the money stacks
+    this.positionComparisonModel(model);
+
+    // Add text label with the object name and actual height
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = 512;
+    canvas.height = 128;
+    context.fillStyle = "white";
+    context.font = "bold 36px Arial";
+    context.fillText(objectData.title, 10, 64);
+    context.font = "24px Arial";
+    context.fillText(`Height: ${height}m`, 10, 100);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const labelMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+
+    const labelGeometry = new THREE.PlaneGeometry(width * 2, width * 0.5);
+    const label = new THREE.Mesh(labelGeometry, labelMaterial);
+    label.position.set(0, height + 0.2, 0); // Position label just above the object
+    label.rotation.x = -Math.PI / 4;
+
+    model.add(label);
+
+    // Add to scene
+    this.comparisonModel = model;
+    this.scene.add(model);
+
+    // Adjust camera to fit both objects
+    this.adjustCameraToFitScene();
+
+    console.log(
+      `Created simple placeholder for: ${objectData.title} with height: ${height}m`
+    );
+  },
+
+  // Position the comparison model next to the money stacks
+  positionComparisonModel(model) {
+    // First, calculate the bounding box of all bills
+    let billsBoundingBox = null;
+
+    if (this.bills.length > 0) {
+      billsBoundingBox = new THREE.Box3();
+
+      for (const bill of this.bills) {
+        const billBox = new THREE.Box3().setFromObject(bill.mesh);
+        billsBoundingBox.union(billBox);
+      }
+    } else {
+      // If no bills, place at origin
+      model.position.set(5, 0, 0);
+      return;
+    }
+
+    // Calculate the size of the bills area
+    const billsSize = new THREE.Vector3();
+    billsBoundingBox.getSize(billsSize);
+
+    // Calculate the size of the comparison model
+    const modelBox = new THREE.Box3().setFromObject(model);
+    const modelSize = new THREE.Vector3();
+    modelBox.getSize(modelSize);
+
+    // Position the model to the right of the bills with some spacing
+    const spacing = Math.max(billsSize.x, modelSize.x) * 0.2; // 20% of the larger width as spacing
+
+    // Get the center of the bills
+    const billsCenter = new THREE.Vector3();
+    billsBoundingBox.getCenter(billsCenter);
+
+    // Position the model to the right of the bills
+    model.position.x = billsBoundingBox.max.x + spacing + modelSize.x / 2;
+    model.position.z = billsCenter.z;
+    // Y position is already set based on the model's origin
+  },
+
+  // Update the adjustCameraToFitStacks method to include comparison objects
+  adjustCameraToFitScene() {
+    // Calculate combined bounding box of bills and comparison object
+    let combinedBox = new THREE.Box3();
+
+    // Add bills to bounding box
+    let hasBills = false;
+    for (const bill of this.bills) {
+      const billBox = new THREE.Box3().setFromObject(bill.mesh);
+      combinedBox.union(billBox);
+      hasBills = true;
+    }
+
+    // Add comparison object to bounding box if it exists
+    if (this.comparisonModel) {
+      const comparisonBox = new THREE.Box3().setFromObject(
+        this.comparisonModel
+      );
+      combinedBox.union(comparisonBox);
+    }
+
+    // If nothing to show, return to default position
+    if (!hasBills && !this.comparisonModel) {
+      this.camera.position.set(0, 10, 20);
+      this.camera.lookAt(0, 0, 0);
+      this.controls.target.set(0, 0, 0);
+      return;
+    }
+
+    // Calculate the center of the combined objects
+    const center = new THREE.Vector3();
+    combinedBox.getCenter(center);
+
+    // Set the camera target to the center
+    this.controls.target.set(center.x, center.y, center.z);
+
+    // Calculate the size of the combined objects
+    const size = new THREE.Vector3();
+    combinedBox.getSize(size);
+
+    // Calculate the distance needed to fit everything in the view with margin
+    const fov = this.camera.fov * (Math.PI / 180);
+    const aspectRatio = this.camera.aspect;
+
+    // Apply a larger margin factor to zoom out further
+    const marginFactor = 1.8;
+
+    // Calculate distances needed for each dimension
+    const fitHeightDistance = (size.y * marginFactor) / (2 * Math.tan(fov / 2));
+    const fitWidthDistance =
+      (size.x * marginFactor) / (2 * Math.tan(fov / 2) * aspectRatio);
+    const fitDepthDistance = (size.z * marginFactor) / (2 * Math.tan(fov / 2));
+
+    // Use the maximum distance to ensure everything fits
+    const distance = Math.max(
+      fitHeightDistance,
+      fitWidthDistance,
+      fitDepthDistance
+    );
+
+    // Position the camera at a different angle (from lower left)
+    const cameraAngle = (Math.PI * 3) / 4; // 135 degrees
+
+    // Calculate camera position
+    const cameraX = center.x - Math.sin(cameraAngle) * distance;
+    const cameraZ = center.z - Math.cos(cameraAngle) * distance;
+
+    // Position camera slightly above the center for a better view
+    const cameraY = center.y + distance * 0.5;
+
+    // Set the camera position
+    this.camera.position.set(cameraX, cameraY, cameraZ);
+
+    // Update the controls
+    this.controls.update();
   },
 };
 
