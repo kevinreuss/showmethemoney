@@ -344,11 +344,9 @@
         <div class="logo">Cash<span>Stack</span></div>
         <div class="header-controls">
           <div class="current-amount">
-            <div class="amount-label" id="amount-description">
-              Average US Home Price
-            </div>
-            <div class="amount-value" id="amount-value">$500,000</div>
-            <div class="amount-bills" id="amount-bills">5,000 x $100 bills</div>
+            <div class="amount-label" id="amount-description"></div>
+            <div class="amount-value" id="amount-value"></div>
+            <div class="amount-bills" id="amount-bills"></div>
           </div>
         </div>
         <button class="change-amount-btn" id="change-amount-btn">
@@ -410,52 +408,56 @@
       // Amount options with descriptions and images
       const amountOptions = [
         {
-          id: "home",
-          value: 500000,
-          title: "Average US Home Price",
-          description: "Average US Home Price",
+          id: "btc",
+          value: 82663,
+          title: "1 Bitcoin (as of March 18, 2025)",
+          description: "1 Bitcoin (as of March 18, 2025)",
           image:
             "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
         },
         {
-          id: "million",
-          value: 1000000,
-          title: "$1 Million",
-          description: "$1 Million",
+          id: "superbowl-commercial",
+          value: 7500000,
+          title: "Cost of a Super Bowl Commercial (30 seconds, as of 2025)",
+          description:
+            "Cost of a Super Bowl Commercial (30 seconds, as of 2025)",
           image:
-            "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
         },
         {
-          id: "billion",
-          value: 1000000000,
-          title: "$1 Billion",
-          description: "$1 Billion",
+          id: "starwars",
+          value: 533000000,
+          title:
+            "Production Costs of the Most Expensive Film Ever Made (as of 2025): Star Wars: The Force Awakens",
+          description:
+            "Production Costs of the Most Expensive Film Ever Made (as of 2025): Star Wars: The Force Awakens",
           image:
-            "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
         },
         {
-          id: "bitcoin",
-          value: 60000,
-          title: "1 Bitcoin",
-          description: "1 Bitcoin (~$90,000)",
+          id: "jackpot",
+          value: 2040000000,
+          title: "Largest Jackpot Ever Won in the US Lottery (as of 2025)",
+          description:
+            "Largest Jackpot Ever Won in the US Lottery (as of 2025)",
           image:
-            "https://images.unsplash.com/photo-1516245834210-c4c142787335?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-        },
-        {
-          id: "coffee",
-          value: 31400000000,
-          title: "US Annual Coffee Spending",
-          description: "US Annual Coffee Spending",
-          image:
-            "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
         },
         {
           id: "musk",
-          value: 234000000000,
-          title: "Elon Musk's Net Worth",
-          description: "Elon Musk's Net Worth",
+          value: 328500000000,
+          title: "Elon Musk’s Net Worth (as of March 2025)",
+          description: "Elon Musk’s Net Worth (as of March 2025)",
           image:
-            "https://images.unsplash.com/photo-1562114938-efe5a4e560f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+        {
+          id: "military",
+          value: 800000000000,
+          title: "Annual Military Expenditures of the USA (as of 2025)",
+          description: "Annual Military Expenditures of the USA (as of 2025)",
+          image:
+            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
         },
       ];
 
