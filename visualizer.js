@@ -319,7 +319,7 @@ const app = {
     const useEdgeTexture = amount < 100000000;
 
     // Check if we should use textures (disable for amounts >= 1 billion)
-    const useTextures = amount < 1000000000;
+    // const useTextures = amount < 1000000000;
 
     // Determine if we should use detailed shadows based on number of stacks
     // For large amounts, disable shadows to improve performance
@@ -503,8 +503,8 @@ const app = {
         position.x,
         position.y,
         position.z,
-        position.bills,
-        useTextures
+        position.bills
+        // useTextures
       );
       stacksCreated++;
     }
@@ -598,7 +598,7 @@ const app = {
   },
 
   // Create a visual stack of bills without physics - optimized version
-  createVisualStack(x, y, z, numBills, useTextures = true) {
+  createVisualStack(x, y, z, numBills) {
     const billWidth = 1.56;
     const billHeight = 0.663;
     const billThickness = 0.0011;
