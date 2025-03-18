@@ -741,7 +741,7 @@
       const setComparisonBtn = document.getElementById("set-comparison-btn");
 
       // Current selected comparison object
-      let currentComparisonId = "none";
+      let currentComparisonId = "human";
       let selectedComparisonCard = null;
 
       // Generate comparison object cards
@@ -908,9 +908,17 @@
           app.visualize(currentAmount);
         }
 
-        // Initialize with no comparison object by default
+        // Initialize with human comparison object by default
         if (app && typeof app.loadComparisonObject === "function") {
-          app.loadComparisonObject("none");
+          app.loadComparisonObject("human");
+
+          // Update comparison button text
+          const humanObject = comparisonObjects.find(
+            (obj) => obj.id === "human"
+          );
+          if (humanObject && comparisonBtn) {
+            comparisonBtn.textContent = `Comparing: ${humanObject.title}`;
+          }
         }
       });
     </script>
