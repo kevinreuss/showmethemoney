@@ -12,15 +12,15 @@
     />
     <style>
       :root {
-        --primary-color: #2e7d32;
-        --primary-light: #60ad5e;
-        --primary-dark: #005005;
-        --secondary-color: #37474f;
+        --primary-color: #000000;
+        --primary-light: #000000;
+        --primary-dark: #000000;
+        --secondary-color: #000000;
         --text-light: #ffffff;
         --text-dark: #212121;
         --background-light: #f5f5f5;
         --background-dark: #263238;
-        --accent-color: #ffd54f;
+        --accent-color: #ff9800;
       }
 
       * {
@@ -43,7 +43,11 @@
 
       /* Header Styles */
       header {
-        background-color: var(--primary-color);
+        background: linear-gradient(
+          to right,
+          var(--primary-dark),
+          var(--primary-color)
+        );
         color: var(--text-light);
         padding: 1rem 2rem;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
@@ -53,8 +57,7 @@
       }
 
       .header-container {
-        max-width: 1400px;
-        margin: 0 auto;
+        margin: 0 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -65,13 +68,17 @@
         font-size: 2.5rem;
         font-weight: 700;
         color: var(--text-light);
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         letter-spacing: -1px;
         text-decoration: none;
+        background-color: #ffffff;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .logo span {
         color: var(--accent-color);
+        -webkit-text-fill-color: var(--accent-color);
       }
 
       /* Main Content Styles */
@@ -85,9 +92,9 @@
 
       .imprint-container {
         background-color: white;
-        border-radius: 8px;
+        border-radius: 12px;
         padding: 2rem;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       }
 
       .imprint-title {
@@ -96,6 +103,14 @@
         margin-bottom: 1.5rem;
         padding-bottom: 0.5rem;
         border-bottom: 2px solid var(--primary-light);
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--primary-light)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .imprint-section {
@@ -115,23 +130,38 @@
 
       .back-button {
         display: inline-block;
-        background-color: var(--primary-color);
+        background: linear-gradient(
+          to bottom,
+          var(--primary-color),
+          var(--primary-dark)
+        );
         color: var(--text-light);
         text-decoration: none;
         padding: 0.75rem 1.5rem;
-        border-radius: 4px;
+        border-radius: 25px;
         font-weight: 500;
         margin-top: 1rem;
-        transition: background-color 0.3s ease;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
       .back-button:hover {
-        background-color: var(--primary-dark);
+        background: linear-gradient(
+          to bottom,
+          var(--primary-light),
+          var(--primary-color)
+        );
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
 
       /* Footer Styles */
       footer {
-        background-color: var(--primary-color);
+        background: linear-gradient(
+          to right,
+          var(--primary-dark),
+          var(--primary-color)
+        );
         color: var(--text-light);
         padding: 1rem 2rem;
         box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
@@ -143,8 +173,7 @@
       }
 
       .footer-container {
-        max-width: 1400px;
-        margin: 0 auto;
+        margin: 0 0;
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -169,12 +198,34 @@
         color: var(--accent-color);
         opacity: 1;
       }
+
+      /* Responsive Styles */
+      @media (max-width: 768px) {
+        .header-container {
+          flex-direction: column;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .logo {
+          font-size: 2rem;
+          margin-bottom: 0.5rem;
+        }
+
+        .imprint-container {
+          padding: 1.5rem;
+        }
+
+        .imprint-title {
+          font-size: 1.8rem;
+        }
+      }
     </style>
   </head>
   <body>
     <header>
       <div class="header-container">
-        <a href="index.html" class="logo">Cash<span>Stack</span></a>
+        <div class="logo">cash-stack<span>.com</span></div>
       </div>
     </header>
 
@@ -196,7 +247,7 @@
           <p>Email: kevreuss@gmail.com</p>
         </div>
 
-        <a href="index.html" class="back-button">Back to CashStack</a>
+        <a href="index.html" class="back-button">Back to cash-stack.com</a>
       </div>
     </main>
 
