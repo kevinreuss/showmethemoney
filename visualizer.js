@@ -409,8 +409,8 @@ const app = {
     const targetRatio = Math.sqrt(aspectRatio);
 
     // Calculate grid dimensions (columns and rows)
-    const maxGridX = 100;
-    const maxGridZ = 100;
+    const maxGridX = 75;
+    const maxGridZ = 150;
     let gridX = Math.min(
       Math.ceil(Math.sqrt(numStacks / targetRatio)),
       maxGridX
