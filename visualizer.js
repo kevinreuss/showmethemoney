@@ -43,7 +43,7 @@ const app = {
   setupThree() {
     // Create scene
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0xf0f0f0);
+    this.scene.background = new THREE.Color(0xc6e4ff); // Light blue sky color
 
     // Create camera
     this.camera = new THREE.PerspectiveCamera(
