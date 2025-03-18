@@ -908,7 +908,10 @@ const app = {
         this.comparisonBoundingBox = scaledBoundingBox;
 
         // Position the model next to the money stacks
-        this.positionComparisonModel(model);
+        this.positionComparisonModel(
+          model,
+          this.comparisonObject ? this.comparisonObject.id : ""
+        );
 
         // Add to scene
         this.comparisonModel = model;
@@ -958,7 +961,7 @@ const app = {
     this.comparisonBoundingBox = boundingBox;
 
     // Position the model next to the money stacks
-    this.positionComparisonModel(model);
+    this.positionComparisonModel(model, "");
 
     // Add text label with the object name and actual height
     // const canvas = document.createElement("canvas");
@@ -998,7 +1001,7 @@ const app = {
   },
 
   // Position the comparison model next to the money stacks
-  positionComparisonModel(model) {
+  positionComparisonModel(model, comparisonId) {
     // First, calculate the bounding box of all bills
     let billsBoundingBox = null;
 
@@ -1014,9 +1017,7 @@ const app = {
       // Calculate the bounding box to position the bottom at y=0
       const modelBox = new THREE.Box3().setFromObject(model);
 
-      const zFightingOffset = 0.1; // Small offset to prevent z-fighting
-
-      model.position.set(5, modelBox.min.y * -1 + zFightingOffset, 0); // Add small offset to prevent z-fighting
+      model.position.set(5, modelBox.min.y * -1, 0); // Add small offset to prevent z-fighting
       return;
     }
 
@@ -1040,9 +1041,12 @@ const app = {
     model.position.x = billsBoundingBox.max.x + spacing + modelSize.x / 2;
     model.position.z = billsCenter.z;
 
+    console.log("comparisonId", comparisonId);
+    const zFightingOffset = comparisonId === "farm-house" ? 0.1 : 0.01;
+
     // Set Y position so the bottom of the model is at y=0.01 (slightly above ground level)
     // We need to offset by the distance from the model's origin to its bottom
-    model.position.y = modelBox.min.y * -1 + 0.01; // Add small offset to prevent z-fighting
+    model.position.y = modelBox.min.y * -1 + zFightingOffset; // Add small offset to prevent z-fighting
   },
 
   // Update the adjustCameraToFitStacks method to include comparison objects
