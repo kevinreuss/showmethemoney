@@ -1297,15 +1297,32 @@
           let newAmount;
           let description = "";
 
-          if (customAmountInput.value.trim() !== "") {
-            newAmount = parseFloat(customAmountInput.value.replace(/,/g, ""));
-            description = "Custom Amount";
-          } else if (selectedCard) {
-            newAmount = parseInt(selectedCard.dataset.value);
-            const option = amountOptions.find(
-              (opt) => opt.id === selectedCard.dataset.id
-            );
-            description = option ? option.description : "";
+          // Prüfen, welcher Tab aktiv ist
+          const isCustomTabActive = document
+            .querySelector('.option-tab[data-target="custom"]')
+            .classList.contains("active");
+
+          if (isCustomTabActive) {
+            // Wenn der Custom-Tab aktiv ist, verwende den benutzerdefinierten Betrag
+            if (customAmountInput.value.trim() !== "") {
+              newAmount = parseFloat(customAmountInput.value.replace(/,/g, ""));
+              description = "Custom Amount";
+            } else {
+              alert("Please enter a valid amount");
+              return;
+            }
+          } else {
+            // Wenn der Predefined-Tab aktiv ist, verwende die ausgewählte Karte
+            if (selectedCard) {
+              newAmount = parseInt(selectedCard.dataset.value);
+              const option = amountOptions.find(
+                (opt) => opt.id === selectedCard.dataset.id
+              );
+              description = option ? option.description : "";
+            } else {
+              alert("Please select an amount option");
+              return;
+            }
           }
 
           if (newAmount && !isNaN(newAmount)) {
@@ -1335,8 +1352,6 @@
             }
 
             amountModal.classList.remove("active");
-          } else {
-            alert("Please enter a valid amount or select an option");
           }
         });
 
