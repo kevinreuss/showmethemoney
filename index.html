@@ -1051,47 +1051,74 @@
           </div>
         `;
 
-        // Small delay to ensure modal is hidden before capture
-        setTimeout(() => {
-          // Try to get the WebGL canvas directly
-          const threeCanvas = document.querySelector("canvas");
+        // Ensure the scene is rendered before capturing
+        if (app && typeof app.renderer !== "undefined") {
+          // Force a render to ensure the latest state is captured
+          app.renderer.render(app.scene, app.camera);
 
-          try {
-            // Try to get the image directly from the Three.js canvas
-            shareImageUrl = threeCanvas.toDataURL("image/png");
+          // Small delay to ensure rendering is complete
+          setTimeout(() => {
+            try {
+              // Get the WebGL canvas
+              const threeCanvas = app.renderer.domElement;
 
-            // Show the captured image in the preview
-            sharePreview.innerHTML = "";
-            const img = document.createElement("img");
-            img.src = shareImageUrl;
-            img.alt = "Cash Stack Visualization";
-            img.style.maxWidth = "100%";
-            img.style.maxHeight = "300px";
-            img.style.borderRadius = "8px";
-            sharePreview.appendChild(img);
+              // Try to get the image directly from the Three.js canvas
+              shareImageUrl = threeCanvas.toDataURL("image/png");
 
-            // Now show the modal with the captured image
-            shareModal.classList.add("active");
+              // Check if the image is valid (not a tiny or empty image)
+              const testImg = new Image();
+              testImg.onload = function () {
+                if (testImg.width > 10 && testImg.height > 10) {
+                  // Show the captured image in the preview
+                  sharePreview.innerHTML = "";
+                  const img = document.createElement("img");
+                  img.src = shareImageUrl;
+                  img.alt = "Cash Stack Visualization";
+                  img.style.maxWidth = "100%";
+                  img.style.maxHeight = "300px";
+                  img.style.borderRadius = "8px";
+                  sharePreview.appendChild(img);
 
-            // Set up share links
-            setupShareLinks(shareImageUrl);
-          } catch (e) {
-            console.error("Error capturing Three.js canvas:", e);
+                  // Set up share links
+                  setupShareLinks(shareImageUrl);
+                } else {
+                  // Image is too small, likely invalid
+                  showCaptureError();
+                }
 
-            // If direct canvas capture fails, show error message
-            sharePreview.innerHTML = `
-              <div style="padding: 20px; background: #f8f8f8; border-radius: 8px; text-align: center;">
-                <p>Sorry, we couldn't capture the visualization.</p>
-                <p>This might be due to security restrictions in your browser.</p>
-                <p>Try using your device's screenshot function instead.</p>
-              </div>
-            `;
+                // Now show the modal
+                shareModal.classList.add("active");
+              };
 
-            // Show the modal even if capture failed
-            shareModal.classList.add("active");
-            setupShareLinks();
-          }
-        }, 100); // Small delay to ensure modal is hidden
+              testImg.onerror = function () {
+                showCaptureError();
+                shareModal.classList.add("active");
+              };
+
+              testImg.src = shareImageUrl;
+            } catch (e) {
+              console.error("Error capturing Three.js canvas:", e);
+              showCaptureError();
+              shareModal.classList.add("active");
+            }
+          }, 200); // Slightly longer delay to ensure rendering is complete
+        } else {
+          showCaptureError();
+          shareModal.classList.add("active");
+        }
+      }
+
+      // Helper function to show error message
+      function showCaptureError() {
+        const sharePreview = document.getElementById("share-preview");
+        sharePreview.innerHTML = `
+          <div style="padding: 20px; background: #f8f8f8; border-radius: 8px; text-align: center;">
+            <p>Sorry, we couldn't capture the visualization.</p>
+            <p>This might be due to security restrictions in your browser.</p>
+            <p>Try using your device's screenshot function instead.</p>
+          </div>
+        `;
+        setupShareLinks();
       }
 
       function setupShareLinks(imageUrl) {
