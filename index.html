@@ -3,62 +3,121 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dollar Stack Visualizer</title>
+    <title>CashStack - Visualize Money in 3D</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
+      :root {
+        --primary-color: #2e7d32;
+        --primary-light: #60ad5e;
+        --primary-dark: #005005;
+        --secondary-color: #37474f;
+        --text-light: #ffffff;
+        --text-dark: #212121;
+        --background-light: #f5f5f5;
+        --background-dark: #263238;
+        --accent-color: #ffd54f;
+      }
+
+      * {
         margin: 0;
         padding: 0;
-        font-family: Arial, sans-serif;
-        overflow: hidden;
-        background-color: #f0f0f0;
+        box-sizing: border-box;
       }
 
-      #container {
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: var(--background-light);
+        color: var(--text-dark);
+        overflow-x: hidden;
+      }
+
+      /* Header Styles */
+      header {
+        background-color: var(--primary-color);
+        color: var(--text-light);
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 100;
+      }
+
+      .header-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        font-family: "Montserrat", sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        letter-spacing: -1px;
+      }
+
+      .logo span {
+        color: var(--accent-color);
+      }
+
+      .current-amount {
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        align-items: flex-end;
       }
 
-      #controls {
-        padding: 20px;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        gap: 15px;
+      .amount-label {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        opacity: 0.9;
       }
 
-      #amount-select {
-        padding: 8px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        width: 300px;
+      .amount-value {
+        font-size: 1.5rem;
+        font-weight: 500;
       }
 
-      #render-btn {
-        padding: 8px 16px;
-        font-size: 16px;
-        background-color: #4caf50;
-        color: white;
+      .amount-bills {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .change-amount-btn {
+        background-color: var(--accent-color);
+        color: var(--text-dark);
         border: none;
         border-radius: 4px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        margin-left: 2rem;
       }
 
-      #render-btn:hover {
-        background-color: #45a049;
+      .change-amount-btn:hover {
+        background-color: #ffb300;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
       }
 
-      #info {
-        margin-left: 20px;
-        font-size: 16px;
+      /* Main Content Styles */
+      main {
+        height: calc(100vh - 140px);
+        position: relative;
       }
 
       #canvas-container {
-        flex: 1;
+        width: 100%;
+        height: 100%;
         position: relative;
       }
 
@@ -67,28 +126,243 @@
         width: 100%;
         height: 100%;
       }
+
+      /* Footer Styles */
+      footer {
+        background-color: var(--secondary-color);
+        color: var(--text-light);
+        padding: 1rem 2rem;
+        height: 60px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+      }
+
+      .imprint-link {
+        color: var(--text-light);
+        opacity: 0.7;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: opacity 0.3s ease;
+      }
+
+      .imprint-link:hover {
+        opacity: 1;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background-color: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 2rem;
+        position: relative;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-overlay.active .modal {
+        transform: translateY(0);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+      }
+
+      .modal-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        transition: color 0.3s ease;
+      }
+
+      .close-modal:hover {
+        color: #333;
+      }
+
+      .amount-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .amount-card {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+      }
+
+      .amount-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
+
+      .amount-card.selected {
+        border: 2px solid var(--primary-color);
+      }
+
+      .card-image {
+        height: 140px;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .card-content {
+        padding: 1rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+      }
+
+      .card-amount {
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+
+      .custom-amount {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+      }
+
+      .custom-amount h3 {
+        margin-bottom: 1rem;
+        color: var(--secondary-color);
+      }
+
+      .custom-amount-input {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .custom-amount-input input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .stack-it-btn {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+        margin-top: 1.5rem;
+      }
+
+      .stack-it-btn:hover {
+        background-color: var(--primary-dark);
+      }
     </style>
   </head>
   <body>
-    <div id="container">
-      <div id="controls">
-        <label for="amount-select">Select an amount:</label>
-        <select id="amount-select">
-          <option value="1000000">$1 Million</option>
-          <option value="234000000000">
-            Elon Musk's Net Worth ($234 billion)
-          </option>
-          <option value="60000">1 Bitcoin (~$90,000)</option>
-          <option value="1000000000">$1 Billion</option>
-          <option value="31400000000">
-            US Annual Coffee Spending ($31.4 billion)
-          </option>
-          <option value="500000">Average US Home Price ($500,000)</option>
-        </select>
-        <!-- <button id="render-btn">Show me the money</button> -->
-        <div id="info">0 x 100$ bill</div>
+    <header>
+      <div class="header-container">
+        <div class="logo">Cash<span>Stack</span></div>
+        <div class="header-controls">
+          <div class="current-amount">
+            <div class="amount-label" id="amount-description">
+              Average US Home Price
+            </div>
+            <div class="amount-value" id="amount-value">$500,000</div>
+            <div class="amount-bills" id="amount-bills">5,000 x $100 bills</div>
+          </div>
+        </div>
+        <button class="change-amount-btn" id="change-amount-btn">
+          Change Amount
+        </button>
       </div>
+    </header>
+
+    <main>
       <div id="canvas-container"></div>
+      <!-- Hidden select element for compatibility with visualizer.js -->
+      <select id="amount-select" style="display: none">
+        <option value="500000">$500,000</option>
+      </select>
+    </main>
+
+    <footer>
+      <a href="#" class="imprint-link">Imprint</a>
+    </footer>
+
+    <!-- Modal for selecting amounts -->
+    <div class="modal-overlay" id="amount-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Choose an Amount to Visualize</h2>
+          <button class="close-modal" id="close-modal">&times;</button>
+        </div>
+
+        <div class="amount-grid" id="amount-grid">
+          <!-- Amount cards will be generated by JavaScript -->
+        </div>
+
+        <div class="custom-amount">
+          <h3>Enter Custom Amount</h3>
+          <div class="custom-amount-input">
+            <input
+              type="text"
+              id="custom-amount"
+              placeholder="Enter amount in dollars (e.g. 1000000)"
+            />
+          </div>
+          <button class="stack-it-btn" id="stack-it-btn">Stack It Up!</button>
+        </div>
+      </div>
     </div>
 
     <!-- Using older cannon.js instead of cannon-es -->
@@ -98,7 +372,214 @@
     <!-- Add GLTFLoader for loading 3D models -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
-    <!-- Deine eigene JavaScript-Datei -->
+    <!-- Main JavaScript -->
     <script src="visualizer.js"></script>
+    <script>
+      // Amount options with descriptions and images
+      const amountOptions = [
+        {
+          id: "home",
+          value: 500000,
+          title: "Average US Home Price",
+          description: "Average US Home Price",
+          image:
+            "https://images.unsplash.com/photo-1518780664697-55e3ad937233?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+        {
+          id: "million",
+          value: 1000000,
+          title: "$1 Million",
+          description: "$1 Million",
+          image:
+            "https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+        {
+          id: "billion",
+          value: 1000000000,
+          title: "$1 Billion",
+          description: "$1 Billion",
+          image:
+            "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+        {
+          id: "bitcoin",
+          value: 60000,
+          title: "1 Bitcoin",
+          description: "1 Bitcoin (~$90,000)",
+          image:
+            "https://images.unsplash.com/photo-1516245834210-c4c142787335?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+        {
+          id: "coffee",
+          value: 31400000000,
+          title: "US Annual Coffee Spending",
+          description: "US Annual Coffee Spending",
+          image:
+            "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+        {
+          id: "musk",
+          value: 234000000000,
+          title: "Elon Musk's Net Worth",
+          description: "Elon Musk's Net Worth",
+          image:
+            "https://images.unsplash.com/photo-1562114938-efe5a4e560f8?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+        },
+      ];
+
+      // DOM Elements
+      const changeAmountBtn = document.getElementById("change-amount-btn");
+      const amountModal = document.getElementById("amount-modal");
+      const closeModalBtn = document.getElementById("close-modal");
+      const amountGrid = document.getElementById("amount-grid");
+      const stackItBtn = document.getElementById("stack-it-btn");
+      const customAmountInput = document.getElementById("custom-amount");
+      const amountDescription = document.getElementById("amount-description");
+      const amountValue = document.getElementById("amount-value");
+      const amountBills = document.getElementById("amount-bills");
+
+      // Current selected amount
+      let currentAmount = 500000;
+      let selectedCard = null;
+
+      // Format number with commas
+      function formatNumber(num) {
+        return num.toLocaleString("en-US");
+      }
+
+      // Update header display
+      function updateAmountDisplay(amount, description) {
+        const formattedAmount = formatNumber(amount);
+        const billCount = Math.round(amount / 100);
+        const formattedBillCount = formatNumber(billCount);
+
+        amountValue.textContent = `$${formattedAmount}`;
+        amountBills.textContent = `${formattedBillCount} x $100 bills`;
+        amountDescription.textContent = description || "";
+      }
+
+      // Generate amount cards
+      function generateAmountCards() {
+        amountGrid.innerHTML = "";
+
+        amountOptions.forEach((option) => {
+          const card = document.createElement("div");
+          card.className = "amount-card";
+          card.dataset.value = option.value;
+          card.dataset.id = option.id;
+
+          if (option.value === currentAmount) {
+            card.classList.add("selected");
+            selectedCard = card;
+          }
+
+          card.innerHTML = `
+            <div class="card-image" style="background-image: url('${
+              option.image
+            }')"></div>
+            <div class="card-content">
+              <div class="card-title">${option.title}</div>
+              <div class="card-amount">$${formatNumber(option.value)}</div>
+            </div>
+          `;
+
+          card.addEventListener("click", () => {
+            if (selectedCard) {
+              selectedCard.classList.remove("selected");
+            }
+            card.classList.add("selected");
+            selectedCard = card;
+            customAmountInput.value = "";
+          });
+
+          amountGrid.appendChild(card);
+        });
+      }
+
+      // Initialize the app
+      function init() {
+        // Find the default option
+        const defaultOption = amountOptions.find(
+          (option) => option.value === currentAmount
+        );
+        if (defaultOption) {
+          updateAmountDisplay(defaultOption.value, defaultOption.description);
+        }
+
+        generateAmountCards();
+
+        // Event listeners
+        changeAmountBtn.addEventListener("click", () => {
+          amountModal.classList.add("active");
+        });
+
+        closeModalBtn.addEventListener("click", () => {
+          amountModal.classList.remove("active");
+        });
+
+        // Close modal when clicking outside
+        amountModal.addEventListener("click", (e) => {
+          if (e.target === amountModal) {
+            amountModal.classList.remove("active");
+          }
+        });
+
+        stackItBtn.addEventListener("click", () => {
+          let newAmount;
+          let description = "";
+
+          if (customAmountInput.value.trim() !== "") {
+            newAmount = parseFloat(customAmountInput.value.replace(/,/g, ""));
+            description = "Custom Amount";
+          } else if (selectedCard) {
+            newAmount = parseInt(selectedCard.dataset.value);
+            const option = amountOptions.find(
+              (opt) => opt.id === selectedCard.dataset.id
+            );
+            description = option ? option.description : "";
+          }
+
+          if (newAmount && !isNaN(newAmount)) {
+            currentAmount = newAmount;
+            updateAmountDisplay(newAmount, description);
+
+            // Update the amount select element for visualizer.js
+            const amountSelect = document.getElementById("amount-select");
+            if (amountSelect) {
+              // Clear existing options
+              amountSelect.innerHTML = "";
+              // Add new option
+              const option = document.createElement("option");
+              option.value = newAmount;
+              option.textContent = `$${formatNumber(newAmount)}`;
+              amountSelect.appendChild(option);
+
+              // Trigger change event to notify visualizer.js
+              const event = new Event("change");
+              amountSelect.dispatchEvent(event);
+            }
+
+            // Call the visualizer with the new amount if it has a direct method
+            if (app && typeof app.renderBills === "function") {
+              app.renderBills();
+            }
+
+            amountModal.classList.remove("active");
+          } else {
+            alert("Please enter a valid amount or select an option");
+          }
+        });
+      }
+
+      // Initialize when the page loads
+      window.addEventListener("load", () => {
+        init();
+
+        // Initialize the visualization with the default amount
+        if (app && typeof app.visualize === "function") {
+          app.visualize(currentAmount);
+        }
+      });
+    </script>
   </body>
 </html>

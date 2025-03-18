@@ -307,7 +307,7 @@ const app = {
     // Format numbers with thousand separators
     const formattedNumBills = numBills.toLocaleString();
     const formattedAmount = amount.toLocaleString();
-    this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount}`;
+    // this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount}`;
 
     if (numBills <= 0) return;
 
@@ -499,7 +499,7 @@ const app = {
     }
 
     // Update info with stack count
-    this.infoElement.textContent = `${formattedNumBills} x 100$ = $${formattedAmount}`;
+    // this.infoElement.textContent = `${formattedNumBills} x 100$ = $${formattedAmount}`;
 
     // Adjust camera to fit all stacks with 10% margin
     this.adjustCameraToFitStacks(minX, maxX, minZ, maxZ, maxY);
@@ -747,7 +747,7 @@ const app = {
     // Update info
     const formattedNumBills = numBills.toLocaleString();
     const formattedAmount = (numBills * 100).toLocaleString();
-    this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount} (${numStacks.toLocaleString()} stacks using instanced rendering)`;
+    // this.infoElement.textContent = `${formattedNumBills} x 100$ bill = $${formattedAmount} (${numStacks.toLocaleString()} stacks using instanced rendering)`;
   },
 
   // Load comparison models
@@ -818,6 +818,28 @@ const app = {
     this.scene.add(label);
 
     console.log("Created simple reference object");
+  },
+
+  // Add a new method to directly visualize an amount
+  visualize(amount) {
+    // Validate and process the amount
+    amount = parseFloat(amount);
+    if (isNaN(amount)) amount = 0;
+
+    // Round to nearest $100
+    amount = Math.round(amount / 100) * 100;
+    amount = Math.min(amount, 500000000000);
+
+    // Store the amount in the amountSelect for compatibility
+    if (this.amountSelect) {
+      this.amountSelect.value = amount;
+    } else {
+      // Create a temporary select element if it doesn't exist
+      this.amountSelect = { value: amount };
+    }
+
+    // Call the existing renderBills method
+    this.renderBills();
   },
 };
 
