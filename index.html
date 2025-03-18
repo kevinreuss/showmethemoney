@@ -3,63 +3,156 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dollar Stack Visualizer</title>
+    <title>cash-stack.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body {
+      :root {
+        --primary-color: #000000;
+        --primary-light: #000000;
+        --primary-dark: #000000;
+        --secondary-color: #000000;
+        --text-light: #ffffff;
+        --text-dark: #212121;
+        --background-light: #f5f5f5;
+        --background-dark: #263238;
+        --accent-color: #ff9800;
+      }
+
+      * {
         margin: 0;
         padding: 0;
-        font-family: Arial, sans-serif;
-        overflow: hidden;
-        background-color: #f0f0f0;
+        box-sizing: border-box;
       }
 
-      #container {
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: var(--background-light);
+        color: var(--text-dark);
+        overflow-x: hidden;
+        margin: 0;
+        padding: 0;
+        height: 100vh;
         display: flex;
         flex-direction: column;
-        height: 100vh;
       }
 
-      #controls {
-        padding: 20px;
-        background-color: #fff;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        z-index: 10;
+      /* Header Styles */
+      header {
+        background: linear-gradient(
+          to right,
+          var(--primary-dark),
+          var(--primary-color)
+        );
+        color: var(--text-light);
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        position: relative;
+        z-index: 100;
+        width: 100%;
+      }
+
+      .header-container {
+        margin: 0 0;
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        gap: 15px;
       }
 
-      #amount {
-        padding: 8px;
-        font-size: 16px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        width: 150px;
+      .logo {
+        font-family: "Montserrat", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-light);
+        letter-spacing: -1px;
+        background-color: #ffffff;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
-      #render-btn {
-        padding: 8px 16px;
-        font-size: 16px;
-        background-color: #4caf50;
+      .logo span {
+        color: var(--accent-color);
+        -webkit-text-fill-color: var(--accent-color);
+      }
+
+      .current-amount {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .amount-label {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+        opacity: 0.9;
+      }
+
+      .amount-value {
+        font-size: 1.5rem;
+        font-weight: 500;
+      }
+
+      .amount-bills {
+        font-size: 0.9rem;
+        opacity: 0.8;
+      }
+
+      .change-amount-btn,
+      .comparison-btn {
+        background: linear-gradient(to bottom, var(--accent-color), #f57c00);
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       }
 
-      #render-btn:hover {
-        background-color: #45a049;
+      .change-amount-btn:hover,
+      .comparison-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
       }
 
-      #info {
-        margin-left: 20px;
-        font-size: 16px;
+      .comparison-btn {
+        background: linear-gradient(to bottom, #ffffff, #e0e0e0);
+        color: var(--text-dark);
+      }
+
+      .comparison-btn:hover {
+        background: linear-gradient(to bottom, #f5f5f5, #cccccc);
+      }
+
+      /* Main Content Styles */
+      main {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
       }
 
       #canvas-container {
-        flex: 1;
+        width: 100%;
+        height: 100%;
         position: relative;
+        max-height: calc(100vh - 150px);
+        margin: 0;
+        padding: 0;
       }
 
       canvas {
@@ -67,461 +160,1351 @@
         width: 100%;
         height: 100%;
       }
+
+      /* Footer Styles */
+      footer {
+        background: linear-gradient(
+          to right,
+          var(--primary-dark),
+          var(--primary-color)
+        );
+        color: var(--text-light);
+        padding: 1rem 2rem;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        z-index: 100;
+      }
+
+      .footer-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+      }
+
+      .footer-left,
+      .footer-center,
+      .footer-right {
+        display: flex;
+        align-items: center;
+      }
+
+      .legal-link {
+        color: var(--text-light);
+        opacity: 0.9;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: opacity 0.3s ease;
+        font-weight: 500;
+      }
+
+      .legal-link:hover {
+        opacity: 1;
+        color: var(--accent-color);
+      }
+
+      .share-picture-btn {
+        background: linear-gradient(to bottom, var(--accent-color), #f57c00);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .share-picture-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
+      }
+
+      .social-link {
+        color: var(--text-light);
+        opacity: 0.9;
+        text-decoration: none;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        margin-left: 1rem;
+      }
+
+      .social-link:hover {
+        opacity: 1;
+      }
+
+      .x-logo {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+      }
+
+      /* Modal Styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .modal {
+        background-color: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 900px;
+        max-height: 95vh;
+        overflow-y: auto;
+        padding: 1rem;
+        position: relative;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .modal-overlay.active .modal {
+        transform: translateY(0);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 0.5rem;
+      }
+
+      .modal-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        background: linear-gradient(
+          to right,
+          var(--primary-color),
+          var(--primary-light)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        transition: color 0.3s ease;
+      }
+
+      .close-modal:hover {
+        color: #333;
+      }
+
+      .amount-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .amount-card,
+      .comparison-card {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        border: 1px solid #f0f0f0;
+      }
+
+      .amount-card:hover,
+      .comparison-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      }
+
+      .amount-card.selected {
+        border: 2px solid var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+      }
+
+      .comparison-card.selected {
+        border: 2px solid var(--secondary-color);
+        box-shadow: 0 0 0 3px rgba(69, 90, 100, 0.2);
+      }
+
+      .card-image {
+        height: 160px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .card-image::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50%;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+        pointer-events: none;
+      }
+
+      .card-content {
+        padding: 1.2rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text-dark);
+      }
+
+      .card-amount {
+        color: var(--primary-color);
+        font-weight: 500;
+        font-size: 1.1rem;
+      }
+
+      .custom-amount {
+        background-color: var(--accent-color);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .custom-amount h3 {
+        margin-bottom: 1rem;
+        color: white;
+      }
+
+      .custom-amount-input {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .custom-amount-input input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .stack-it-btn {
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        width: 100%;
+        margin-top: 0rem;
+      }
+
+      .stack-it-btn:hover {
+        background-color: var(--primary-dark);
+      }
+
+      .header-buttons {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .comparison-info {
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        color: var(--text-light);
+        opacity: 0.8;
+      }
+
+      .comparison-info-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 0.5rem;
+        border-radius: 50%;
+        background-color: var(--accent-color);
+      }
+
+      /* Share Modal Styles */
+      .share-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .share-modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .share-modal {
+        background-color: white;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 500px;
+        padding: 1rem;
+        position: relative;
+        transform: translateY(-20px);
+        transition: transform 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .share-modal-overlay.active .share-modal {
+        transform: translateY(0);
+      }
+
+      .share-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 1rem;
+      }
+
+      .share-modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      .close-share-modal {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #999;
+        transition: color 0.3s ease;
+      }
+
+      .close-share-modal:hover {
+        color: #333;
+      }
+
+      .share-preview {
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      .share-preview img {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .share-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: center;
+      }
+
+      .share-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 80px;
+        text-decoration: none;
+        color: var(--text-dark);
+      }
+
+      .share-button:hover {
+        background-color: #f5f5f5;
+        transform: translateY(-2px);
+      }
+
+      .share-icon {
+        width: 32px;
+        height: 32px;
+        margin-bottom: 0.5rem;
+      }
+
+      .share-label {
+        font-size: 0.8rem;
+        text-align: center;
+      }
+
+      .download-button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+      }
+
+      .download-button:hover {
+        background-color: var(--primary-dark);
+      }
+
+      .share-text-suggestion {
+        margin: 1.5rem 0;
+        text-align: left;
+      }
+
+      .share-text-suggestion h4 {
+        margin-bottom: 1rem;
+        color: var(--primary-color);
+        font-size: 1.2rem;
+      }
+
+      .share-steps {
+        list-style-position: inside;
+        padding: 0;
+      }
+
+      .share-steps li {
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+      }
+
+      .share-steps li p {
+        display: inline-block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+      }
+
+      .share-text-box {
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+        border-left: 3px solid var(--accent-color);
+        word-break: break-word;
+      }
+
+      .option-selector {
+        margin-bottom: 0.5rem;
+      }
+
+      .option-tabs {
+        display: flex;
+        border-bottom: 1px solid #e0e0e0;
+        margin-bottom: 0.5rem;
+      }
+
+      .option-tab {
+        padding: 0.75rem 1.5rem;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #757575;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .option-tab:hover {
+        color: var(--primary-color);
+      }
+
+      .option-tab.active {
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+      }
+
+      .custom-amount {
+        background-color: #f5f5f5;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .custom-amount-description {
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        color: var(--text-dark);
+      }
+
+      .custom-amount-input {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        background-color: white;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        padding: 0 0.75rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .currency-symbol {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        padding-right: 0.5rem;
+      }
+
+      .custom-amount-input input {
+        flex: 1;
+        padding: 0.75rem 0;
+        border: none;
+        font-size: 1.2rem;
+        outline: none;
+      }
+
+      .custom-amount-helper {
+        font-size: 0.9rem;
+        color: #757575;
+        margin-top: 0.5rem;
+      }
     </style>
   </head>
   <body>
-    <div id="container">
-      <div id="controls">
-        <label for="amount">Amount in dollars:</label>
-        <input type="number" id="amount" min="0" step="100" value="100000" />
-        <button id="render-btn">Render</button>
-        <div id="info">Bills: 0</div>
+    <header>
+      <div class="header-container">
+        <div class="logo">cash-stack<span>.com</span></div>
+        <div class="header-controls">
+          <div class="current-amount">
+            <div class="amount-label" id="amount-description">
+              1 Bitcoin (as of March 18, 2025)
+            </div>
+            <div class="amount-value" id="amount-value">$82,663</div>
+            <!-- <div class="amount-bills" id="amount-bills">826 x $100 bills</div> -->
+          </div>
+        </div>
+        <div class="header-buttons">
+          <button class="comparison-btn" id="comparison-btn">
+            Add Comparison Object
+          </button>
+          <button class="change-amount-btn" id="change-amount-btn">
+            Show another amount
+          </button>
+        </div>
       </div>
+    </header>
+
+    <main>
       <div id="canvas-container"></div>
+      <!-- Hidden select element for compatibility with visualizer.js -->
+      <select id="amount-select" style="display: none">
+        <option value="500000">$500,000</option>
+      </select>
+    </main>
+
+    <footer>
+      <div class="footer-container">
+        <div class="footer-left">
+          <a href="legal.html" class="legal-link">Legal</a>
+          <a
+            href="mailto:kevreuss@gmail.com"
+            class="legal-link"
+            style="margin-left: 1rem"
+            >Feedback?</a
+          >
+        </div>
+        <div class="footer-center">
+          <button class="share-picture-btn" id="share-picture-btn">
+            Share Picture
+          </button>
+        </div>
+        <div class="footer-right">
+          <a
+            href="https://x.com/cash_stack_com"
+            target="_blank"
+            class="social-link"
+            id="x-link"
+          >
+            <svg
+              class="x-logo"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Modal for selecting amounts -->
+    <div class="modal-overlay" id="amount-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Choose an Amount to Visualize</h2>
+          <button class="close-modal" id="close-modal">&times;</button>
+        </div>
+
+        <div class="option-selector">
+          <div class="option-tabs">
+            <button class="option-tab active" data-target="predefined">
+              Predefined Amounts
+            </button>
+            <button class="option-tab" data-target="custom">
+              Custom Amount
+            </button>
+          </div>
+        </div>
+
+        <div class="option-content" id="predefined-content">
+          <div class="amount-grid" id="amount-grid">
+            <!-- Amount cards will be generated by JavaScript -->
+          </div>
+        </div>
+
+        <div class="option-content" id="custom-content" style="display: none">
+          <div class="custom-amount">
+            <p class="custom-amount-description">
+              Enter any dollar amount you'd like to visualize
+            </p>
+            <div class="custom-amount-input">
+              <span class="currency-symbol">$</span>
+              <input
+                type="text"
+                id="custom-amount"
+                placeholder="Enter amount (e.g. 1000000)"
+              />
+            </div>
+            <p class="custom-amount-helper">
+              Enter numbers only, commas will be added automatically
+            </p>
+          </div>
+        </div>
+
+        <button class="stack-it-btn" id="stack-it-btn">Show!</button>
+      </div>
+    </div>
+
+    <!-- Modal for selecting comparison objects -->
+    <div class="modal-overlay" id="comparison-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Choose a Comparison Object</h2>
+          <button class="close-modal" id="close-comparison-modal">
+            &times;
+          </button>
+        </div>
+
+        <div class="amount-grid" id="comparison-grid">
+          <!-- Comparison object cards will be generated by JavaScript -->
+        </div>
+
+        <button class="stack-it-btn" id="set-comparison-btn">Set!</button>
+      </div>
+    </div>
+
+    <!-- Add this before the closing body tag -->
+    <div class="share-modal-overlay" id="share-modal">
+      <div class="share-modal">
+        <div class="share-modal-header">
+          <h3 class="share-modal-title">Share Picture</h3>
+          <button class="close-share-modal" id="close-share-modal">
+            &times;
+          </button>
+        </div>
+        <div class="share-preview" id="share-preview">
+          <!-- Preview image will be inserted here -->
+        </div>
+        <div class="share-text-suggestion">
+          <h4>Share with Friends</h4>
+          <ol class="share-steps">
+            <li>
+              <p>Download the visualization:</p>
+              <button class="download-button" id="download-image">
+                Download Picture
+              </button>
+            </li>
+            <li>
+              <p>Copy this text to share with your post:</p>
+              <div class="share-text-box" id="share-text-content">
+                <!-- The text will be dynamically inserted by JavaScript -->
+              </div>
+            </li>
+            <li>
+              <p>Post it on your favorite social media platform!</p>
+            </li>
+          </ol>
+        </div>
+      </div>
     </div>
 
     <!-- Using older cannon.js instead of cannon-es -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <!-- Add GLTFLoader for loading 3D models -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
+    <!-- Main JavaScript -->
+    <script src="visualizer.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script>
-      // Main application
-      const app = {
-        // Scene setup
-        scene: null,
-        camera: null,
-        renderer: null,
-        controls: null,
-
-        // Physics
-        world: null,
-        timeStep: 1 / 60,
-
-        // Objects
-        bills: [],
-        billMesh: null,
-        billTexture: null,
-
-        // DOM elements
-        amountInput: document.getElementById("amount"),
-        renderBtn: document.getElementById("render-btn"),
-        infoElement: document.getElementById("info"),
-
-        // Initialize the application
-        init() {
-          this.setupThree();
-          this.setupPhysics();
-          this.setupLights();
-          this.setupGround();
-          this.loadBillTexture();
-          this.setupEventListeners();
-          this.animate();
+      // Amount options with descriptions and images
+      const amountOptions = [
+        {
+          id: "btc",
+          value: 82663,
+          title: "1 Bitcoin (March 18, 2025)",
+          description: "1 Bitcoin (March 18, 2025)",
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/btc.jpeg",
         },
-
-        // Set up Three.js scene, camera, renderer
-        setupThree() {
-          // Create scene
-          this.scene = new THREE.Scene();
-          this.scene.background = new THREE.Color(0xf0f0f0);
-
-          // Create camera
-          this.camera = new THREE.PerspectiveCamera(
-            75,
-            window.innerWidth / window.innerHeight,
-            0.1,
-            1000
-          );
-          this.camera.position.set(0, 10, 20);
-
-          // Create renderer
-          this.renderer = new THREE.WebGLRenderer({ antialias: true });
-          this.renderer.setSize(window.innerWidth, window.innerHeight);
-          this.renderer.setPixelRatio(window.devicePixelRatio);
-          this.renderer.shadowMap.enabled = true;
-          document
-            .getElementById("canvas-container")
-            .appendChild(this.renderer.domElement);
-
-          // Add orbit controls but disable rotation
-          this.controls = new THREE.OrbitControls(
-            this.camera,
-            this.renderer.domElement
-          );
-          this.controls.enableRotate = false; // Disable rotation
-          this.controls.enablePan = false; // Disable panning
-          this.controls.enableZoom = true; // Allow zooming only
-          this.controls.enableDamping = true;
-          this.controls.dampingFactor = 0.05;
-
-          // Handle window resize
-          window.addEventListener("resize", () => {
-            this.camera.aspect = window.innerWidth / window.innerHeight;
-            this.camera.updateProjectionMatrix();
-            this.renderer.setSize(window.innerWidth, window.innerHeight);
-          });
-
-          // Setup raycaster for interaction
-          this.raycaster = new THREE.Raycaster();
-          this.mouse = new THREE.Vector2();
-          this.selectedBill = null;
-          this.intersectedBill = null;
+        {
+          id: "superbowl-commercial",
+          value: 7500000,
+          title: "Cost of 30s Super Bowl Commercial (2025)",
+          description: "Cost of 30s Super Bowl Commercial (2025)",
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/super-bowl.jpeg",
         },
-
-        // Set up physics world
-        setupPhysics() {
-          // Create a world with gravity but we won't be adding bodies to it
-          this.world = new CANNON.World();
-          this.world.gravity.set(0, -9.82, 0);
+        {
+          id: "gpt4-training",
+          value: 100000000,
+          title: "Estimated Training Costs for GPT-4",
+          description:
+            "The estimated costs for training OpenAI's GPT-4 AI language model",
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/gpt4.jpeg",
         },
-
-        // Set up lights
-        setupLights() {
-          // Ambient light
-          const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-          this.scene.add(ambientLight);
-
-          // Directional light (sun)
-          const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-          directionalLight.position.set(10, 20, 10);
-          directionalLight.castShadow = true;
-          directionalLight.shadow.mapSize.width = 2048;
-          directionalLight.shadow.mapSize.height = 2048;
-          directionalLight.shadow.camera.near = 0.5;
-          directionalLight.shadow.camera.far = 50;
-          directionalLight.shadow.camera.left = -20;
-          directionalLight.shadow.camera.right = 20;
-          directionalLight.shadow.camera.top = 20;
-          directionalLight.shadow.camera.bottom = -20;
-          this.scene.add(directionalLight);
+        {
+          id: "starwars",
+          value: 533000000,
+          title: "Production Costs Star Wars: The Force Awakens",
+          description: "Production Costs Star Wars: The Force Awakens",
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/starwars.jpeg",
         },
-
-        // Set up ground plane
-        setupGround() {
-          // Three.js ground
-          const groundGeometry = new THREE.PlaneGeometry(50, 50);
-          const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x999999,
-            roughness: 0.8,
-            metalness: 0.2,
-          });
-          const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-          ground.rotation.x = -Math.PI / 2;
-          ground.receiveShadow = true;
-          this.scene.add(ground);
-
-          // Cannon.js ground - updated for old Cannon.js syntax
-          const groundShape = new CANNON.Plane();
-          const groundBody = new CANNON.Body({
-            mass: 0,
-          });
-          groundBody.addShape(groundShape);
-          groundBody.quaternion.setFromAxisAngle(
-            new CANNON.Vec3(1, 0, 0),
-            -Math.PI / 2
-          );
-          this.world.addBody(groundBody);
+        {
+          id: "jackpot",
+          value: 2040000000,
+          title: "Largest Jackpot Ever Won in US Lottery (as of 2025)",
+          description: "Largest Jackpot Ever Won in US Lottery (as of 2025)",
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/jackpot.jpeg",
         },
-
-        // Load bill texture
-        loadBillTexture() {
-          const textureLoader = new THREE.TextureLoader();
-          this.billTexture = textureLoader.load(
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Usdollar100front.jpg/2560px-Usdollar100front.jpg",
-            // Add onLoad callback to handle texture loading
-            () => {
-              console.log("Texture loaded successfully");
-              // Force material update
-              if (Array.isArray(this.billMesh.material)) {
-                this.billMesh.material.forEach((mat) => {
-                  if (mat.map) mat.needsUpdate = true;
-                });
-              }
-            },
-            // Add onProgress callback (optional)
-            undefined,
-            // Add onError callback
-            (err) => {
-              console.error("Error loading texture:", err);
-              // Fallback to a green color if texture fails
-              if (Array.isArray(this.billMesh.material)) {
-                this.billMesh.material[2] = new THREE.MeshStandardMaterial({
-                  color: 0x85bb65,
-                  roughness: 0.5,
-                  metalness: 0.1,
-                });
-              }
-            }
-          );
-
-          // Create bill geometry (100 dollar bill dimensions: 156mm x 66.3mm x 0.11mm)
-          // Using realistic dimensions
-          const billWidth = 1.56;
-          const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
-
-          const billGeometry = new THREE.BoxGeometry(
-            billWidth,
-            billThickness,
-            billHeight
-          );
-
-          // Create materials for the bill
-          const frontMaterial = new THREE.MeshStandardMaterial({
-            map: this.billTexture,
-            roughness: 0.5,
-            metalness: 0.1,
-          });
-          const backMaterial = new THREE.MeshStandardMaterial({
-            color: 0x85bb65,
-            roughness: 0.5,
-            metalness: 0.2,
-          });
-          const edgeMaterial = new THREE.MeshStandardMaterial({
-            color: 0xcccccc,
-            roughness: 0.5,
-            metalness: 0.1,
-          });
-
-          const materials = [
-            edgeMaterial, // right side
-            edgeMaterial, // left side
-            frontMaterial, // top (front of bill)
-            backMaterial, // bottom (back of bill)
-            edgeMaterial, // front edge
-            edgeMaterial, // back edge
-          ];
-
-          this.billMesh = new THREE.Mesh(billGeometry, materials);
-          this.billMesh.castShadow = true;
-          this.billMesh.receiveShadow = true;
+        {
+          id: "musk",
+          value: 328500000000,
+          title: "Elon Musk's Net Worth (March 2025)",
+          description: "Elon Musk's Net Worth (as of March 2025)",
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/elon.jpeg",
         },
+      ];
 
-        // Set up event listeners
-        setupEventListeners() {
-          this.renderBtn.addEventListener("click", this.renderBills.bind(this));
-
-          // Use mousedown for bill selection
-          this.renderer.domElement.addEventListener("mousedown", (event) => {
-            if (event.button === 0) {
-              // Left mouse button
-              this.handleBillSelection(event);
-            }
-          });
-
-          // Use mousemove for bill dragging
-          this.renderer.domElement.addEventListener("mousemove", (event) => {
-            if (this.selectedBill) {
-              this.handleBillDragging(event);
-            }
-          });
-
-          // Use mouseup to release bill
-          this.renderer.domElement.addEventListener("mouseup", (event) => {
-            if (event.button === 0) {
-              // Left mouse button
-              this.selectedBill = null;
-            }
-          });
+      // Add this to the existing script in index.html, after the amountOptions array
+      const comparisonObjects = [
+        {
+          id: "none",
+          title: "None",
+          description: "None",
+          height: 0,
+          width: 0,
+          depth: 0,
+          image:
+            "https://images.unsplash.com/photo-1533035353720-f1c6a75cd8ab?q=80&w=2070&auto=format&fit=crop",
+          modelPath: null,
         },
+        {
+          id: "rubber-duck",
+          title: "Rubber Duck",
+          description: "Rubber Duck",
+          height: 0.1, // meters
+          width: 0.1, // meters (shoulder width)
+          depth: 0.1, // meters (chest depth)
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/rubber-duck.png",
+          modelPath:
+            "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF/Duck.gltf",
+        },
+        {
+          id: "tesla-cybertruck",
+          title: "Tesla Cybertruck",
+          description: "Tesla Cybertruck",
+          height: 1.79, // meters
+          width: 2.41, // meters
+          depth: 5.68, // meters (length)
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/tesla-cybertruck.png",
+          modelPath:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/main/models/tesla-cybertruck.glb",
+        },
+        {
+          id: "farm-house",
+          title: "Farm House",
+          description: "Farm House",
+          height: 9, // meters
+          width: 12.2, // meters
+          depth: 15.2, // meters
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/farm-house.png",
+          modelPath:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/main/models/farm-house.glb",
+        },
+        {
+          id: "airplane",
+          title: "Airplane",
+          description: "Airplane",
+          height: 19.4, // meters
+          width: 64.4, // meters (wingspan)
+          depth: 70.66, // meters (length)
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/airplane.png",
+          modelPath:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/main/models/airplane.glb",
+        },
+        {
+          id: "statue-of-liberty",
+          title: "Statue of Liberty",
+          description: "Statue of Liberty",
+          height: 93, // meters (including base)
+          width: 19, // meters (at base)
+          depth: 19, // meters (at base)
+          image:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/statue-of-liberty.png",
+          modelPath:
+            "https://raw.githubusercontent.com/kevinreuss/cashstack-content/main/models/statue-of-liberty.glb",
+        },
+      ];
 
-        handleBillSelection(event) {
-          // Calculate mouse position
-          this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-          this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      // DOM Elements
+      const changeAmountBtn = document.getElementById("change-amount-btn");
+      const amountModal = document.getElementById("amount-modal");
+      const closeModalBtn = document.getElementById("close-modal");
+      const amountGrid = document.getElementById("amount-grid");
+      const stackItBtn = document.getElementById("stack-it-btn");
+      const customAmountInput = document.getElementById("custom-amount");
+      const amountDescription = document.getElementById("amount-description");
+      const amountValue = document.getElementById("amount-value");
+      // const amountBills = document.getElementById("amount-bills");
 
-          this.raycaster.setFromCamera(this.mouse, this.camera);
-          const intersects = this.raycaster.intersectObjects(
-            this.bills.map((bill) => bill.mesh)
-          );
+      // Current selected amount
+      let currentAmount = 500000;
+      let selectedCard = null;
 
-          if (intersects.length > 0) {
-            // Find the bill that was clicked
-            const selectedMesh = intersects[0].object;
-            for (const bill of this.bills) {
-              if (
-                bill.mesh === selectedMesh ||
-                bill.mesh.id === selectedMesh.id
-              ) {
-                this.selectedBill = bill;
-                console.log("Bill selected!");
-                break;
-              }
-            }
+      // Format number with commas
+      function formatNumber(num) {
+        return num.toLocaleString("en-US");
+      }
+
+      // Update header display
+      function updateAmountDisplay(amount, description) {
+        const formattedAmount = formatNumber(amount);
+        const billCount = Math.round(amount / 100);
+        const formattedBillCount = formatNumber(billCount);
+
+        amountValue.textContent = `$${formattedAmount}`;
+        // amountBills.textContent = `${formattedBillCount} x $100 bills`;
+        amountDescription.textContent = description || "";
+      }
+
+      // Generate amount cards
+      function generateAmountCards() {
+        amountGrid.innerHTML = "";
+
+        amountOptions.forEach((option) => {
+          const card = document.createElement("div");
+          card.className = "amount-card";
+          card.dataset.value = option.value;
+          card.dataset.id = option.id;
+
+          if (option.value === currentAmount) {
+            card.classList.add("selected");
+            selectedCard = card;
           }
-        },
 
-        handleBillDragging(event) {
-          // Calculate mouse position
-          this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-          this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+          card.innerHTML = `
+            <div class="card-image" style="background-image: url('${
+              option.image
+            }')"></div>
+            <div class="card-content">
+              <div class="card-title">${option.title}</div>
+              <div class="card-amount">$${formatNumber(option.value)}</div>
+            </div>
+          `;
 
-          this.raycaster.setFromCamera(this.mouse, this.camera);
-          const planeIntersection = new THREE.Vector3();
-          const dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
-          this.raycaster.ray.intersectPlane(dragPlane, planeIntersection);
+          card.addEventListener("click", () => {
+            if (selectedCard) {
+              selectedCard.classList.remove("selected");
+            }
+            card.classList.add("selected");
+            selectedCard = card;
+            customAmountInput.value = "";
+          });
 
-          // Move the bill to follow the mouse
-          this.selectedBill.body.position.x = planeIntersection.x;
-          this.selectedBill.body.position.z = planeIntersection.z;
-          this.selectedBill.body.position.y = Math.max(
-            0.1,
-            planeIntersection.y
+          amountGrid.appendChild(card);
+        });
+      }
+
+      // DOM Elements for comparison modal
+      const comparisonBtn = document.getElementById("comparison-btn");
+      const comparisonModal = document.getElementById("comparison-modal");
+      const closeComparisonModalBtn = document.getElementById(
+        "close-comparison-modal"
+      );
+      const comparisonGrid = document.getElementById("comparison-grid");
+      const setComparisonBtn = document.getElementById("set-comparison-btn");
+
+      // Current selected comparison object
+      let currentComparisonId = "human";
+      let selectedComparisonCard = null;
+
+      // Generate comparison object cards
+      function generateComparisonCards() {
+        comparisonGrid.innerHTML = "";
+
+        comparisonObjects.forEach((object) => {
+          const card = document.createElement("div");
+          card.className = "comparison-card";
+          card.dataset.id = object.id;
+
+          if (object.id === currentComparisonId) {
+            card.classList.add("selected");
+            selectedComparisonCard = card;
+          }
+
+          card.innerHTML = `
+            <div class="card-image" style="background-image: url('${
+              object.image
+            }')"></div>
+            <div class="card-content">
+              <div class="card-title">${object.title}</div>
+              ${
+                object.height
+                  ? `<div class="card-height">Height: ${object.height}m</div>`
+                  : ""
+              }
+            </div>
+          `;
+
+          card.addEventListener("click", () => {
+            if (selectedComparisonCard) {
+              selectedComparisonCard.classList.remove("selected");
+            }
+            card.classList.add("selected");
+            selectedComparisonCard = card;
+          });
+
+          comparisonGrid.appendChild(card);
+        });
+      }
+
+      // Add this to your existing script
+      let shareImageUrl = null;
+
+      function captureAndShare() {
+        // Temporarily hide the share modal while capturing
+        const shareModal = document.getElementById("share-modal");
+        shareModal.classList.remove("active");
+
+        // Prepare the preview area for when we show it later
+        const sharePreview = document.getElementById("share-preview");
+        sharePreview.innerHTML = `
+          <div style="padding: 20px; text-align: center;">
+            <p>Capturing visualization...</p>
+          </div>
+        `;
+
+        // Ensure the scene is rendered before capturing
+        if (app && typeof app.renderer !== "undefined") {
+          // Force a render to ensure the latest state is captured
+          app.renderer.render(app.scene, app.camera);
+
+          // Small delay to ensure rendering is complete
+          setTimeout(() => {
+            try {
+              // Get the WebGL canvas
+              const threeCanvas = app.renderer.domElement;
+
+              // Try to get the image directly from the Three.js canvas
+              shareImageUrl = threeCanvas.toDataURL("image/png");
+
+              // Check if the image is valid (not a tiny or empty image)
+              const testImg = new Image();
+              testImg.onload = function () {
+                if (testImg.width > 10 && testImg.height > 10) {
+                  // Show the captured image in the preview
+                  sharePreview.innerHTML = "";
+                  const img = document.createElement("img");
+                  img.src = shareImageUrl;
+                  img.alt = "Cash Stack Visualization";
+                  img.style.maxWidth = "100%";
+                  img.style.maxHeight = "300px";
+                  img.style.borderRadius = "8px";
+                  sharePreview.appendChild(img);
+
+                  // Set up share links
+                  setupShareLinks(shareImageUrl);
+                } else {
+                  // Image is too small, likely invalid
+                  showCaptureError();
+                }
+
+                // Now show the modal
+                shareModal.classList.add("active");
+              };
+
+              testImg.onerror = function () {
+                showCaptureError();
+                shareModal.classList.add("active");
+              };
+
+              testImg.src = shareImageUrl;
+            } catch (e) {
+              console.error("Error capturing Three.js canvas:", e);
+              showCaptureError();
+              shareModal.classList.add("active");
+            }
+          }, 200); // Slightly longer delay to ensure rendering is complete
+        } else {
+          showCaptureError();
+          shareModal.classList.add("active");
+        }
+      }
+
+      // Helper function to show error message
+      function showCaptureError() {
+        const sharePreview = document.getElementById("share-preview");
+        sharePreview.innerHTML = `
+          <div style="padding: 20px; background: #f8f8f8; border-radius: 8px; text-align: center;">
+            <p>Sorry, we couldn't capture the visualization.</p>
+            <p>This might be due to security restrictions in your browser.</p>
+            <p>Try using your device's screenshot function instead.</p>
+          </div>
+        `;
+        setupShareLinks();
+      }
+
+      function setupShareLinks(imageUrl) {
+        // Get the current page URL (use the deployed URL, not local file path)
+        let pageUrl;
+        if (window.location.protocol === "file:") {
+          pageUrl = "https://cash-stack.com";
+        } else {
+          pageUrl = window.location.href.split("?")[0]; // Remove any query parameters
+        }
+
+        // Get the current amount description and value
+        const amountDesc = document
+          .getElementById("amount-description")
+          .textContent.trim();
+        const amountVal = document
+          .getElementById("amount-value")
+          .textContent.trim();
+
+        // Create the share text based on whether there's a comparison object
+        let shareText;
+        if (currentComparisonId && currentComparisonId !== "none") {
+          const comparisonObj = comparisonObjects.find(
+            (obj) => obj.id === currentComparisonId
           );
-          this.selectedBill.body.velocity.set(0, 0, 0);
-          this.selectedBill.body.angularVelocity.set(0, 0, 0);
-          this.selectedBill.body.wakeUp();
-        },
+          if (comparisonObj) {
+            shareText = `Here's a comparison of ${amountDesc} (${amountVal}) and a ${comparisonObj.title} on ${pageUrl}`;
+          }
+        } else {
+          shareText = `Here's a visualization of ${amountDesc} (${amountVal}) on ${pageUrl}`;
+        }
 
-        // Render bills based on input amount
-        renderBills() {
-          // Clear existing bills
-          this.clearBills();
+        // Update the share text content
+        const shareTextContent = document.getElementById("share-text-content");
+        if (shareTextContent) {
+          shareTextContent.textContent = shareText;
+        }
 
-          // Get amount and round to nearest $100
-          let amount = parseFloat(this.amountInput.value);
-          if (isNaN(amount)) amount = 0;
+        // Set up download button
+        const downloadBtn = document.getElementById("download-image");
+        const newDownloadBtn = downloadBtn.cloneNode(true);
+        downloadBtn.parentNode.replaceChild(newDownloadBtn, downloadBtn);
 
-          // Round to nearest $100
-          amount = Math.round(amount / 100) * 100;
-          this.amountInput.value = amount;
-
-          // Calculate number of bills
-          const numBills = amount / 100;
-          this.infoElement.textContent = `Bills: ${numBills}`;
-
-          if (numBills <= 0) return;
-
-          // Create bills
-          const billWidth = 1.56;
-          const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke
-
-          // Each stack represents $10,000 (100 bills)
-          const billsPerStack = 100;
-          const stackValue = 10000;
-          const numStacks = Math.ceil(amount / stackValue);
-
-          // Maximum grid size: can be different for X and Y
-          const maxGridSizeX = 3; // Maximum columns
-          const maxGridSizeY = 5; // Maximum rows
-
-          // Base spacing on bill dimensions for a consistent look
-          let spacingX = billWidth * 1.15; // Horizontal spacing with small gap
-          let spacingZ = billHeight * 1.15; // Vertical spacing proportional to bill height
-
-          // Calculate how many stacks per layer
-          const stacksPerLayer = maxGridSizeX * maxGridSizeY;
-          const numLayers = Math.ceil(numStacks / stacksPerLayer);
-
-          // Height of a full stack (100 bills)
-          const fullStackHeight = billThickness * billsPerStack;
-
-          for (let i = 0; i < numStacks; i++) {
-            // Calculate how many bills in this stack (last stack might be partial)
-            const remainingAmount = amount - i * stackValue;
-            const stackBills = Math.min(billsPerStack, remainingAmount / 100);
-
-            if (stackBills <= 0) break;
-
-            // Calculate which layer this stack belongs to
-            const layer = Math.floor(i / stacksPerLayer);
-
-            // Calculate position within the current layer's grid
-            const posInLayer = i % stacksPerLayer;
-            const row = Math.floor(posInLayer / maxGridSizeX);
-            const col = posInLayer % maxGridSizeX;
-
-            // Center the grid
-            let offsetX = (col - (maxGridSizeX - 1) / 2) * spacingX;
-            let offsetZ = (row - (maxGridSizeY - 1) / 2) * spacingZ;
-
-            // Y position depends on the layer
-            let offsetY = layer * fullStackHeight;
-
-            // Create a visual stack without physics
-            this.createVisualStack(
-              offsetX,
-              offsetY, // Start at the appropriate layer height
-              offsetZ,
-              stackBills
+        newDownloadBtn.textContent = "Download Picture";
+        newDownloadBtn.addEventListener("click", () => {
+          if (imageUrl) {
+            const link = document.createElement("a");
+            link.href = imageUrl;
+            link.download = "cash-stack-visualization.png";
+            link.click();
+          } else {
+            alert(
+              "Sorry, the image couldn't be generated. Try taking a screenshot instead."
             );
           }
-        },
+        });
+      }
 
-        // Create a visual stack of bills without physics
-        createVisualStack(x, y, z, numBills) {
-          const billWidth = 1.56;
-          const billHeight = 0.663;
-          const billThickness = 0.0011; // Realistische Dicke: 0.11mm = 0.0011 Einheiten
+      // Initialize the app
+      function init() {
+        // Find the default option
+        const defaultOption = amountOptions.find(
+          (option) => option.value === currentAmount
+        );
+        if (defaultOption) {
+          updateAmountDisplay(defaultOption.value, defaultOption.description);
+        }
 
-          // Create a group to hold all bills in this stack
-          const stackGroup = new THREE.Group();
-          stackGroup.position.set(x, y, z);
-          this.scene.add(stackGroup);
+        generateAmountCards();
+        generateComparisonCards();
 
-          // Add individual bill meshes to the stack with slight offset for visibility
-          for (let i = 0; i < numBills; i++) {
-            const bill = this.billMesh.clone();
+        // Event listeners
+        changeAmountBtn.addEventListener("click", () => {
+          amountModal.classList.add("active");
+        });
 
-            // Position each bill with a very slight offset for better visibility
-            // This creates a small "stair-step" effect to see individual bills
-            const offsetX = (Math.random() - 0.5) * 0.01; // Tiny random X offset
-            const offsetZ = (Math.random() - 0.5) * 0.01; // Tiny random Z offset
+        closeModalBtn.addEventListener("click", () => {
+          amountModal.classList.remove("active");
+        });
 
-            bill.position.set(
-              offsetX,
-              billThickness * i + billThickness / 2,
-              offsetZ
-            );
-
-            // Very slight random rotation for realism
-            bill.rotation.set(
-              0,
-              (Math.random() - 0.5) * 0.02, // Tiny random Y rotation
-              0
-            );
-
-            stackGroup.add(bill);
+        // Close modal when clicking outside
+        amountModal.addEventListener("click", (e) => {
+          if (e.target === amountModal) {
+            amountModal.classList.remove("active");
           }
+        });
 
-          // Store reference to the stack
-          this.bills.push({
-            mesh: stackGroup,
-            billCount: numBills,
-            isVisualStack: true,
-          });
-        },
+        stackItBtn.addEventListener("click", () => {
+          let newAmount;
+          let description = "";
 
-        // Clear all bills
-        clearBills() {
-          for (const bill of this.bills) {
-            this.scene.remove(bill.mesh);
-            // Only remove physics bodies if they exist
-            if (bill.body) {
-              this.world.removeBody(bill.body);
+          // Prüfen, welcher Tab aktiv ist
+          const isCustomTabActive = document
+            .querySelector('.option-tab[data-target="custom"]')
+            .classList.contains("active");
+
+          if (isCustomTabActive) {
+            // Wenn der Custom-Tab aktiv ist, verwende den benutzerdefinierten Betrag
+            if (customAmountInput.value.trim() !== "") {
+              newAmount = parseFloat(customAmountInput.value.replace(/,/g, ""));
+              description = "Custom Amount";
+            } else {
+              alert("Please enter a valid amount");
+              return;
+            }
+          } else {
+            // Wenn der Predefined-Tab aktiv ist, verwende die ausgewählte Karte
+            if (selectedCard) {
+              newAmount = parseInt(selectedCard.dataset.value);
+              const option = amountOptions.find(
+                (opt) => opt.id === selectedCard.dataset.id
+              );
+              description = option ? option.description : "";
+            } else {
+              alert("Please select an amount option");
+              return;
             }
           }
-          this.bills = [];
-        },
 
-        // Animation loop - simplified without physics
-        animate() {
-          requestAnimationFrame(this.animate.bind(this));
+          if (newAmount && !isNaN(newAmount)) {
+            currentAmount = newAmount;
+            updateAmountDisplay(newAmount, description);
 
-          // No physics updates needed
+            // Update the amount select element for visualizer.js
+            const amountSelect = document.getElementById("amount-select");
+            if (amountSelect) {
+              amountSelect.innerHTML = "";
+              const option = document.createElement("option");
+              option.value = newAmount;
+              option.textContent = `$${formatNumber(newAmount)}`;
+              amountSelect.appendChild(option);
 
-          // Update controls
-          this.controls.update();
+              // Trigger change event to notify visualizer.js
+              const event = new Event("change");
+              amountSelect.dispatchEvent(event);
+            }
 
-          // Render scene
-          this.renderer.render(this.scene, this.camera);
-        },
-      };
+            // First render the bills, then reposition the comparison object
+            if (app) {
+              app.renderBills();
+              if (currentComparisonId !== "none") {
+                app.loadComparisonObject(currentComparisonId);
+              }
+            }
+
+            amountModal.classList.remove("active");
+          }
+        });
+
+        // Event listeners for comparison modal
+        comparisonBtn.addEventListener("click", () => {
+          comparisonModal.classList.add("active");
+        });
+
+        closeComparisonModalBtn.addEventListener("click", () => {
+          comparisonModal.classList.remove("active");
+        });
+
+        // Close modal when clicking outside
+        comparisonModal.addEventListener("click", (e) => {
+          if (e.target === comparisonModal) {
+            comparisonModal.classList.remove("active");
+          }
+        });
+
+        setComparisonBtn.addEventListener("click", () => {
+          if (selectedComparisonCard) {
+            currentComparisonId = selectedComparisonCard.dataset.id;
+
+            // Update button text based on selection
+            if (currentComparisonId === "none") {
+              comparisonBtn.textContent = "Add Comparison Object";
+            } else {
+              const selectedObject = comparisonObjects.find(
+                (obj) => obj.id === currentComparisonId
+              );
+              comparisonBtn.textContent = `Edit Comparison`;
+            }
+
+            // First ensure bills are rendered, then add comparison object
+            if (app) {
+              app.renderBills();
+              app.loadComparisonObject(currentComparisonId);
+            }
+
+            comparisonModal.classList.remove("active");
+          }
+        });
+
+        // Add event listener for share picture button
+        const sharePictureBtn = document.getElementById("share-picture-btn");
+        if (sharePictureBtn) {
+          sharePictureBtn.addEventListener("click", captureAndShare);
+        }
+
+        // Close share modal
+        const closeShareModalBtn = document.getElementById("close-share-modal");
+        if (closeShareModalBtn) {
+          closeShareModalBtn.addEventListener("click", () => {
+            document.getElementById("share-modal").classList.remove("active");
+          });
+        }
+
+        // Close modal when clicking outside
+        const shareModal = document.getElementById("share-modal");
+        if (shareModal) {
+          shareModal.addEventListener("click", (e) => {
+            if (e.target === shareModal) {
+              shareModal.classList.remove("active");
+            }
+          });
+        }
+
+        // Update X link with your actual username
+        const xLink = document.getElementById("x-link");
+        if (xLink) {
+          xLink.href = "https://x.com/cash_stack_com"; // Replace with your actual X username
+        }
+
+        // Tab switching functionality
+        const optionTabs = document.querySelectorAll(".option-tab");
+        const optionContents = document.querySelectorAll(".option-content");
+
+        optionTabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            // Remove active class from all tabs
+            optionTabs.forEach((t) => t.classList.remove("active"));
+
+            // Add active class to clicked tab
+            tab.classList.add("active");
+
+            // Hide all content sections
+            optionContents.forEach((content) => {
+              content.style.display = "none";
+            });
+
+            // Show the selected content
+            const targetId = tab.dataset.target + "-content";
+            document.getElementById(targetId).style.display = "block";
+
+            // Clear selections when switching tabs
+            if (tab.dataset.target === "custom") {
+              // When switching to custom, deselect any selected card
+              if (selectedCard) {
+                selectedCard.classList.remove("selected");
+                selectedCard = null;
+              }
+            } else {
+              // When switching to predefined, clear custom input
+              customAmountInput.value = "";
+            }
+          });
+        });
+
+        // Format custom amount input with commas as user types
+        customAmountInput.addEventListener("input", function (e) {
+          // Remove any non-numeric characters
+          let value = this.value.replace(/[^\d]/g, "");
+
+          // Format with commas
+          if (value.length > 0) {
+            value = parseInt(value).toLocaleString("en-US");
+          }
+
+          // Update the input value
+          this.value = value;
+        });
+      }
 
       // Initialize when the page loads
       window.addEventListener("load", () => {
-        app.init();
+        init();
+
+        // Initialize the visualization with the default amount
+        if (app && typeof app.visualize === "function") {
+          app.visualize(currentAmount);
+        }
+
+        // Initialize with human comparison object by default
+        if (app && typeof app.loadComparisonObject === "function") {
+          app.loadComparisonObject("human");
+
+          // Update comparison button text
+          const humanObject = comparisonObjects.find(
+            (obj) => obj.id === "human"
+          );
+          if (humanObject && comparisonBtn) {
+            comparisonBtn.textContent = `Edit Comparison`;
+          }
+        }
       });
     </script>
   </body>
