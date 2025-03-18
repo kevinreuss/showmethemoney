@@ -1010,8 +1010,10 @@ const app = {
         billsBoundingBox.union(billBox);
       }
     } else {
-      // If no bills, place at origin
-      model.position.set(5, 0, 0);
+      // If no bills, place at origin with y=0
+      // Calculate the bounding box to position the bottom at y=0
+      const modelBox = new THREE.Box3().setFromObject(model);
+      model.position.set(5, modelBox.min.y * -1, 0);
       return;
     }
 
@@ -1034,7 +1036,10 @@ const app = {
     // Position the model to the right of the bills
     model.position.x = billsBoundingBox.max.x + spacing + modelSize.x / 2;
     model.position.z = billsCenter.z;
-    // Y position is already set based on the model's origin
+
+    // Set Y position so the bottom of the model is at y=0 (ground level)
+    // We need to offset by the distance from the model's origin to its bottom
+    model.position.y = modelBox.min.y * -1;
   },
 
   // Update the adjustCameraToFitStacks method to include comparison objects
