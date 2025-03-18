@@ -74,6 +74,10 @@ const app = {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.05;
 
+    // Restrict vertical rotation to prevent viewing from below
+    this.controls.minPolarAngle = 0.1; // Slightly above horizontal to prevent glitchy behavior
+    this.controls.maxPolarAngle = Math.PI / 2.1; // Slightly less than 90 degrees to prevent seeing below ground
+
     // Handle window resize
     window.addEventListener("resize", () => {
       this.camera.aspect = window.innerWidth / window.innerHeight;
