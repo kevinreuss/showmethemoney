@@ -710,7 +710,7 @@
         <div class="share-preview" id="share-preview">
           <!-- Preview image will be inserted here -->
         </div>
-        <div class="share-options">
+        <!-- <div class="share-options">
           <a href="#" class="share-button" id="share-twitter" target="_blank">
             <svg
               class="share-icon"
@@ -776,7 +776,7 @@
             </svg>
             <span class="share-label">Email</span>
           </a>
-        </div>
+        </div> -->
         <button class="download-button" id="download-image">
           Download Image
         </button>
@@ -1138,21 +1138,21 @@
         );
 
         // Set up social media share links
-        document.getElementById(
-          "share-twitter"
-        ).href = `https://twitter.com/intent/tweet?text=${text}&url=${pageUrl}`;
-        document.getElementById(
-          "share-facebook"
-        ).href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
-        document.getElementById(
-          "share-linkedin"
-        ).href = `https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`;
-        document.getElementById(
-          "share-whatsapp"
-        ).href = `https://wa.me/?text=${text}%20${pageUrl}`;
-        document.getElementById(
-          "share-email"
-        ).href = `mailto:?subject=${title}&body=${text}%20${pageUrl}`;
+        // document.getElementById(
+        //   "share-twitter"
+        // ).href = `https://twitter.com/intent/tweet?text=${text}&url=${pageUrl}`;
+        // document.getElementById(
+        //   "share-facebook"
+        // ).href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
+        // document.getElementById(
+        //   "share-linkedin"
+        // ).href = `https://www.linkedin.com/sharing/share-offsite/?url=${pageUrl}`;
+        // document.getElementById(
+        //   "share-whatsapp"
+        // ).href = `https://wa.me/?text=${text}%20${pageUrl}`;
+        // document.getElementById(
+        //   "share-email"
+        // ).href = `mailto:?subject=${title}&body=${text}%20${pageUrl}`;
 
         // Set up download button
         const downloadBtn = document.getElementById("download-image");
