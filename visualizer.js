@@ -1045,7 +1045,7 @@ const app = {
     model.position.z = billsCenter.z;
 
     console.log("comparisonId", comparisonId);
-    const zFightingOffset = comparisonId === "farm-house" ? 0.1 : 0.01;
+    const zFightingOffset = comparisonId === "farm-house" ? 1 : 0.01;
 
     // Set Y position so the bottom of the model is at y=0.01 (slightly above ground level)
     // We need to offset by the distance from the model's origin to its bottom

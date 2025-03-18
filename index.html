@@ -799,8 +799,8 @@
         {
           id: "superbowl-commercial",
           value: 7500000,
-          title: "30s Super Bowl Commercial (2025)",
-          description: "30s Super Bowl Commercial (2025)",
+          title: "Cost of 30s Super Bowl Commercial (2025)",
+          description: "Cost of 30s Super Bowl Commercial (2025)",
           image:
             "https://raw.githubusercontent.com/kevinreuss/cashstack-content/refs/heads/main/images/amounts/super-bowl.jpeg",
         },
@@ -1130,19 +1130,18 @@
           .getElementById("amount-value")
           .textContent.trim();
 
-        // Get the current comparison object if any
-        let comparisonText = "";
+        // Create the share text based on whether there's a comparison object
+        let shareText;
         if (currentComparisonId && currentComparisonId !== "none") {
           const comparisonObj = comparisonObjects.find(
             (obj) => obj.id === currentComparisonId
           );
           if (comparisonObj) {
-            comparisonText = ` and a ${comparisonObj.title}`;
+            shareText = `Here's a comparison of ${amountDesc} (${amountVal}) and a ${comparisonObj.title} on ${pageUrl}`;
           }
+        } else {
+          shareText = `Here's a visualization of ${amountDesc} (${amountVal}) on ${pageUrl}`;
         }
-
-        // Create the share text
-        const shareText = `Here's a comparison of ${amountDesc} (${amountVal})${comparisonText} on ${pageUrl}`;
 
         // Update the share text content
         const shareTextContent = document.getElementById("share-text-content");
