@@ -421,7 +421,7 @@
               1 Bitcoin (as of March 18, 2025)
             </div>
             <div class="amount-value" id="amount-value">$82,663</div>
-            <div class="amount-bills" id="amount-bills">826 x $100 bills</div>
+            <!-- <div class="amount-bills" id="amount-bills">826 x $100 bills</div> -->
           </div>
         </div>
         <div class="header-buttons">
@@ -637,7 +637,7 @@
       const customAmountInput = document.getElementById("custom-amount");
       const amountDescription = document.getElementById("amount-description");
       const amountValue = document.getElementById("amount-value");
-      const amountBills = document.getElementById("amount-bills");
+      // const amountBills = document.getElementById("amount-bills");
 
       // Current selected amount
       let currentAmount = 500000;
@@ -655,7 +655,7 @@
         const formattedBillCount = formatNumber(billCount);
 
         amountValue.textContent = `$${formattedAmount}`;
-        amountBills.textContent = `${formattedBillCount} x $100 bills`;
+        // amountBills.textContent = `${formattedBillCount} x $100 bills`;
         amountDescription.textContent = description || "";
       }
 
