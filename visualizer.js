@@ -114,8 +114,8 @@ const app = {
 
   // Set up ground plane
   setupGround() {
-    // Three.js ground - 10x larger (500x500 instead of 50x50)
-    const groundGeometry = new THREE.PlaneGeometry(500, 500);
+    // Three.js ground - much larger (5000x5000 instead of 500x500)
+    const groundGeometry = new THREE.PlaneGeometry(5000, 5000);
 
     // Load grass texture
     const textureLoader = new THREE.TextureLoader();
@@ -136,7 +136,7 @@ const app = {
     // Repeat the texture to make it look more realistic
     grassTexture.wrapS = THREE.RepeatWrapping;
     grassTexture.wrapT = THREE.RepeatWrapping;
-    grassTexture.repeat.set(30, 30); // More repeats for the larger plane
+    grassTexture.repeat.set(300, 300); // More repeats for the much larger plane
 
     const groundMaterial = new THREE.MeshStandardMaterial({
       map: grassTexture,
