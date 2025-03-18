@@ -906,6 +906,14 @@ const app = {
         const scale = (selectedObject.height * 10) / modelSize.y;
         model.scale.set(scale, scale, scale);
 
+        // Apply specific rotations for certain models
+        if (selectedObject.id === "tesla-cybertruck") {
+          // Rotate the Cybertruck model
+          model.rotation.y = 0;
+          model.rotation.x = 0.05;
+          model.rotation.z = 0.1;
+        }
+
         // Recalculate bounding box after scaling
         const scaledBoundingBox = new THREE.Box3().setFromObject(model);
         this.comparisonBoundingBox = scaledBoundingBox;
@@ -1045,7 +1053,12 @@ const app = {
     model.position.z = billsCenter.z;
 
     console.log("comparisonId", comparisonId);
-    const zFightingOffset = comparisonId === "farm-house" ? 1 : 0.01;
+    const zFightingOffset =
+      comparisonId === "farm-house"
+        ? 1
+        : comparisonId === "tesla-cybertruck"
+        ? -1
+        : 0.01;
 
     // Set Y position so the bottom of the model is at y=0.01 (slightly above ground level)
     // We need to offset by the distance from the model's origin to its bottom
