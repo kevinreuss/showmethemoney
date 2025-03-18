@@ -441,47 +441,43 @@ const app = {
 
     // Create a map to store bills at each grid position
     const gridPositions = new Map();
-    let remainingBills = numBills;
 
-    // Distribute bills to grid positions
-    console.log("start");
+    // Calculate how many complete layers we can fill
+    const billsPerCompleteLayer = stacksPerLayer * billsPerStack;
+    const completeLayersCount = Math.floor(numBills / billsPerCompleteLayer);
+    let remainingBills = numBills - completeLayersCount * billsPerCompleteLayer;
 
-    for (let layer = 0; layer < numLayers; layer++) {
-      for (let row = 0; row < gridZ; row++) {
-        for (let col = 0; col < gridX; col++) {
-          if (remainingBills <= 0) break;
+    // First, fill all complete layers (we can do this mathematically without loops)
+    for (let row = 0; row < gridZ; row++) {
+      for (let col = 0; col < gridX; col++) {
+        // Calculate position
+        const offsetX = (col - (gridX - 1) / 2) * spacingX;
+        const offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
+        const posKey = `${row},${col}`;
 
-          // Calculate position key based only on horizontal position (x,z)
+        // Each position gets completeLayersCount * billsPerStack bills
+        gridPositions.set(posKey, {
+          x: offsetX,
+          y: 0,
+          z: offsetZ,
+          bills: completeLayersCount * billsPerStack,
+        });
+      }
+    }
+
+    // Now distribute remaining bills for the partial layer (if any)
+    if (remainingBills > 0) {
+      for (let row = 0; row < gridZ && remainingBills > 0; row++) {
+        for (let col = 0; col < gridX && remainingBills > 0; col++) {
           const posKey = `${row},${col}`;
-
-          // Calculate bills in this stack
           const stackBills = Math.min(billsPerStack, remainingBills);
           remainingBills -= stackBills;
 
-          // Calculate position
-          const offsetX = (col - (gridX - 1) / 2) * spacingX;
-          const offsetZ = (row - (gridZ - 1) / 2) * spacingZ;
-
-          // Add to existing position or create new entry
-          if (gridPositions.has(posKey)) {
-            // Add bills to existing stack at this x,z position
-            gridPositions.get(posKey).bills += stackBills;
-          } else {
-            // Create new entry at this x,z position
-            gridPositions.set(posKey, {
-              x: offsetX,
-              y: 0, // Start at ground level
-              z: offsetZ,
-              bills: stackBills,
-            });
-          }
+          // Add to existing position
+          gridPositions.get(posKey).bills += stackBills;
         }
-        if (remainingBills <= 0) break;
       }
-      if (remainingBills <= 0) break;
     }
-
-    console.log("finish");
 
     // Create stacks for each grid position
     let stacksCreated = 0;
