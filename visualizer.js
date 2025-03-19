@@ -913,6 +913,12 @@ const app = {
           model.rotation.x = 0.05;
           model.rotation.z = 0.1;
         }
+        if (selectedObject.id === "rubber-duck") {
+          // Rotate the Cybertruck model
+          model.rotation.y = -Math.PI / 2;
+          model.rotation.x = 0;
+          model.rotation.z = 0;
+        }
 
         // Recalculate bounding box after scaling
         const scaledBoundingBox = new THREE.Box3().setFromObject(model);
