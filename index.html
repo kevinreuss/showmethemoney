@@ -1157,7 +1157,7 @@
       const setComparisonBtn = document.getElementById("set-comparison-btn");
 
       // Current selected comparison object
-      let currentComparisonId = "tesla-cybertruck";
+      let currentComparisonId = "rubber-duck";
       let selectedComparisonCard = null;
 
       // Generate comparison object cards
@@ -1585,18 +1585,13 @@
       window.addEventListener("load", () => {
         init();
 
-        // Initialize the visualization with the default amount
-        if (app && typeof app.visualize === "function") {
-          app.visualize(currentAmount);
-        }
-
-        // Initialize with tesla-cybertruck comparison object by default
+        // Initialize with rubber-duck comparison object by default
         if (app && typeof app.loadComparisonObject === "function") {
-          app.loadComparisonObject("tesla-cybertruck");
+          app.loadComparisonObject("rubber-duck");
 
           // Update comparison button text
           const teslaCybertruckObject = comparisonObjects.find(
-            (obj) => obj.id === "tesla-cybertruck"
+            (obj) => obj.id === "rubber-duck"
           );
           if (teslaCybertruckObject && comparisonBtn) {
             comparisonBtn.textContent = `Edit Comparison`;

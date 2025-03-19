@@ -842,28 +842,6 @@ const app = {
     console.log("Created simple reference object");
   },
 
-  // Add a new method to directly visualize an amount
-  visualize(amount) {
-    // Validate and process the amount
-    amount = parseFloat(amount);
-    if (isNaN(amount)) amount = 0;
-
-    // Round to nearest $100
-    amount = Math.round(amount / 100) * 100;
-    amount = Math.min(amount, 500000000000);
-
-    // Store the amount in the amountSelect for compatibility
-    if (this.amountSelect) {
-      this.amountSelect.value = amount;
-    } else {
-      // Create a temporary select element if it doesn't exist
-      this.amountSelect = { value: amount };
-    }
-
-    // Call the existing renderBills method
-    // this.renderBills();
-  },
-
   // Add this method to load and position comparison objects
   loadComparisonObject(objectId) {
     // Remove any existing comparison object
