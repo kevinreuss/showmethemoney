@@ -114,7 +114,7 @@
       }
 
       .amount-bills {
-        font-size: 0.9rem;
+        font-size: 1rem;
         opacity: 0.8;
       }
 
@@ -212,7 +212,7 @@
         color: var(--text-light);
         opacity: 0.9;
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 1rem;
         transition: opacity 0.3s ease;
         font-weight: 500;
       }
@@ -477,7 +477,7 @@
         display: flex;
         align-items: center;
         margin-top: 0.5rem;
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: var(--text-light);
         opacity: 0.8;
       }
@@ -659,7 +659,7 @@
         padding: 1rem;
         padding-right: 40px;
         margin-top: 0.5rem;
-        font-size: 0.9rem;
+        font-size: 1rem;
         border-left: 3px solid var(--accent-color);
         word-break: break-word;
       }
@@ -769,7 +769,7 @@
       }
 
       .custom-amount-helper {
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: #757575;
         margin-top: 0.5rem;
       }
@@ -791,6 +791,39 @@
         transform: translateY(-2px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
+      }
+
+      .coffee-btn {
+        background: linear-gradient(to bottom, #6f4e37, #3f2a1c) !important;
+        position: relative;
+        padding-left: 2.5rem !important;
+        border: 2px solid #ff9800 !important;
+      }
+
+      .coffee-btn:hover {
+        background: linear-gradient(to bottom, #7d5b42, #6f4e37) !important;
+      }
+
+      .coffee-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+      }
+
+      /* Spezielle Anpassung für den mobilen Button */
+      .mobile-btn.coffee-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-left: 1.5rem !important;
+      }
+
+      .mobile-btn .coffee-icon {
+        position: static;
+        transform: none;
+        margin-right: 0.5rem;
       }
 
       /* Mobile Responsive Styles */
@@ -843,7 +876,7 @@
           width: 100%;
           margin: 0.25rem 0;
           padding: 0.5rem;
-          font-size: 0.9rem;
+          font-size: 1rem;
         }
 
         /* Modal Anpassungen */
@@ -884,7 +917,7 @@
         }
 
         .amount-label {
-          font-size: 0.9rem;
+          font-size: 1rem;
         }
 
         .legal-link,
@@ -897,8 +930,8 @@
         display: none;
         background: none;
         border: none;
-        color: white;
-        font-size: 1.5rem;
+        color: var(--accent-color);
+        font-size: 2rem;
         cursor: pointer;
       }
 
@@ -957,6 +990,39 @@
           justify-content: center;
         }
       }
+
+      .coffee-btn {
+        background: linear-gradient(to bottom, #6f4e37, #3f2a1c) !important;
+        position: relative;
+        padding-left: 2.5rem !important;
+        border: 2px solid #ff9800 !important;
+      }
+
+      .coffee-btn:hover {
+        background: linear-gradient(to bottom, #7d5b42, #6f4e37) !important;
+      }
+
+      .coffee-icon {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+      }
+
+      /* Spezielle Anpassung für den mobilen Button */
+      .mobile-btn.coffee-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding-left: 1.5rem !important;
+      }
+
+      .mobile-btn .coffee-icon {
+        position: static;
+        transform: none;
+        margin-right: 0.5rem;
+      }
     </style>
   </head>
   <body>
@@ -977,7 +1043,7 @@
         </div>
         <div class="header-buttons">
           <button class="comparison-btn" id="comparison-btn">
-            Add Comparison Object
+            Show another comparison object
           </button>
           <button class="change-amount-btn" id="change-amount-btn">
             Show another amount
@@ -989,16 +1055,20 @@
     <div class="mobile-menu" id="mobile-menu">
       <div class="mobile-menu-content">
         <button class="comparison-btn mobile-btn" id="mobile-comparison-btn">
-          Add Comparison Object
+          Show another comparison object
         </button>
-        <button class="change-amount-btn mobile-btn" id="mobile-amount-btn">
+        <button class="comparison-btn mobile-btn" id="mobile-amount-btn">
           Show another amount
         </button>
         <button class="share-picture-btn mobile-btn" id="mobile-share-btn">
           Share Picture
         </button>
-        <button class="support-btn mobile-btn" id="mobile-support-btn">
-          You like this project? Support me with coffee!
+        <button
+          class="support-btn mobile-btn coffee-btn"
+          id="mobile-support-btn"
+        >
+          <span class="coffee-icon">☕</span>
+          Support this project
         </button>
         <div class="mobile-links">
           <a href="legal.html" class="legal-link">Legal</a>
@@ -1034,11 +1104,12 @@
       <div class="footer-container">
         <div class="footer-left">
           <button
-            class="support-btn"
+            class="support-btn coffee-btn"
             id="support-btn"
             style="margin-left: 1rem"
           >
-            You like this project? Support me with coffee!
+            <span class="coffee-icon">☕</span>
+            Support this project
           </button>
         </div>
         <div class="footer-center">
@@ -1156,7 +1227,7 @@
           <h4>Share with Friends</h4>
           <ol class="share-steps">
             <li>
-              <p>Download the visualization:</p>
+              <p>Download the picture:</p>
               <button class="download-button" id="download-image">
                 Download Picture
               </button>
@@ -1199,7 +1270,10 @@
               </div>
             </li>
             <li>
-              <p>Post it on your favorite social media platform!</p>
+              <p>
+                Post the picture and the text on your favorite social media
+                platform!
+              </p>
             </li>
           </ol>
         </div>
