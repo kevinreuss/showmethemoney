@@ -1157,7 +1157,7 @@
       const setComparisonBtn = document.getElementById("set-comparison-btn");
 
       // Current selected comparison object
-      let currentComparisonId = "human";
+      let currentComparisonId = "tesla-cybertruck";
       let selectedComparisonCard = null;
 
       // Generate comparison object cards
@@ -1590,15 +1590,15 @@
           app.visualize(currentAmount);
         }
 
-        // Initialize with human comparison object by default
+        // Initialize with tesla-cybertruck comparison object by default
         if (app && typeof app.loadComparisonObject === "function") {
-          app.loadComparisonObject("human");
+          app.loadComparisonObject("tesla-cybertruck");
 
           // Update comparison button text
-          const humanObject = comparisonObjects.find(
-            (obj) => obj.id === "human"
+          const teslaCybertruckObject = comparisonObjects.find(
+            (obj) => obj.id === "tesla-cybertruck"
           );
-          if (humanObject && comparisonBtn) {
+          if (teslaCybertruckObject && comparisonBtn) {
             comparisonBtn.textContent = `Edit Comparison`;
           }
         }
