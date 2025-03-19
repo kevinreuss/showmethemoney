@@ -225,6 +225,25 @@
         background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
       }
 
+      .support-btn {
+        background: linear-gradient(to bottom, var(--accent-color), #f57c00);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .support-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
+      }
+
       .social-link {
         color: var(--text-light);
         opacity: 0.9;
@@ -698,6 +717,25 @@
         color: #757575;
         margin-top: 0.5rem;
       }
+
+      .support-btn {
+        background: linear-gradient(to bottom, var(--accent-color), #f57c00);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .support-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
+      }
     </style>
   </head>
   <body>
@@ -735,7 +773,13 @@
     <footer>
       <div class="footer-container">
         <div class="footer-left">
-          <!-- This div is now empty but kept for structure -->
+          <button
+            class="support-btn"
+            id="support-btn"
+            style="margin-left: 1rem"
+          >
+            You like this project? Support me with coffee!
+          </button>
         </div>
         <div class="footer-center">
           <button class="share-picture-btn" id="share-picture-btn">
@@ -769,17 +813,6 @@
         </div>
       </div>
     </footer>
-
-    <!-- Ko-fi Widget -->
-    <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
-    <script>
-      kofiWidgetOverlay.draw("kevreuss", {
-        type: "floating-chat",
-        "floating-chat.donateButton.text": "Support me",
-        "floating-chat.donateButton.background-color": "#323842",
-        "floating-chat.donateButton.text-color": "#fff",
-      });
-    </script>
 
     <!-- Modal for selecting amounts -->
     <div class="modal-overlay" id="amount-modal">
@@ -878,6 +911,30 @@
               <p>Post it on your favorite social media platform!</p>
             </li>
           </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Modal -->
+    <div class="modal-overlay" id="support-modal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Support this Project</h2>
+          <button class="close-modal" id="close-support-modal">&times;</button>
+        </div>
+        <div class="support-content">
+          <p style="margin-bottom: 1rem">
+            Thank you for considering supporting this project!<br />
+            Your contribution helps keep cash-stack.com and other projects
+            running and improving.
+          </p>
+          <iframe
+            id="kofiframe"
+            src="https://ko-fi.com/kevreuss/?hidefeed=true&widget=true&embed=true&preview=true"
+            style="border: none; width: 100%; padding: 4px; background: #f9f9f9"
+            height="712"
+            title="kevreuss"
+          ></iframe>
         </div>
       </div>
     </div>
@@ -1494,6 +1551,34 @@
           // Update the input value
           this.value = value;
         });
+
+        // Support Modal Functionality
+        const supportBtn = document.getElementById("support-btn");
+        const supportModal = document.getElementById("support-modal");
+        const closeSupportModalBtn = document.getElementById(
+          "close-support-modal"
+        );
+
+        if (supportBtn) {
+          supportBtn.addEventListener("click", () => {
+            supportModal.classList.add("active");
+          });
+        }
+
+        if (closeSupportModalBtn) {
+          closeSupportModalBtn.addEventListener("click", () => {
+            supportModal.classList.remove("active");
+          });
+        }
+
+        // Close modal when clicking outside
+        if (supportModal) {
+          supportModal.addEventListener("click", (e) => {
+            if (e.target === supportModal) {
+              supportModal.classList.remove("active");
+            }
+          });
+        }
       }
 
       // Initialize when the page loads
