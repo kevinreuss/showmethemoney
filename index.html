@@ -752,12 +752,180 @@
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
         background: linear-gradient(to bottom, #ffb74d, var(--accent-color));
       }
+
+      /* Mobile Responsive Styles */
+      @media (max-width: 768px) {
+        /* Header Anpassungen */
+        .header-container {
+          flex-direction: column;
+          padding: 0.5rem;
+        }
+
+        .header-buttons {
+          display: flex;
+          flex-direction: column;
+          width: 100%;
+          margin-top: 0.5rem;
+        }
+
+        .header-buttons button {
+          margin-bottom: 0.5rem;
+          width: 100%;
+        }
+
+        .current-amount {
+          margin: 0.5rem 0;
+        }
+
+        /* Footer Anpassungen */
+        .footer-container {
+          flex-direction: column;
+          align-items: center;
+          padding: 0.5rem;
+        }
+
+        .footer-left,
+        .footer-center,
+        .footer-right {
+          width: 100%;
+          justify-content: center;
+          margin-bottom: 0.5rem;
+        }
+
+        .footer-right {
+          display: flex;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+
+        .support-btn,
+        .share-picture-btn {
+          width: 100%;
+          margin: 0.25rem 0;
+          padding: 0.5rem;
+          font-size: 0.9rem;
+        }
+
+        /* Modal Anpassungen */
+        .modal {
+          width: 95%;
+          max-width: 95%;
+          max-height: 90vh;
+          overflow-y: auto;
+        }
+
+        .amount-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .share-modal {
+          width: 95%;
+          max-width: 95%;
+        }
+
+        #canvas-container {
+          height: 60vh; /* Reduzierte Höhe auf mobilen Geräten */
+        }
+
+        main {
+          padding-top: 0;
+          padding-bottom: 0;
+        }
+      }
+
+      /* Für sehr kleine Bildschirme */
+      @media (max-width: 480px) {
+        .logo {
+          font-size: 1.2rem;
+        }
+
+        .amount-value {
+          font-size: 1.2rem;
+        }
+
+        .amount-label {
+          font-size: 0.9rem;
+        }
+
+        .legal-link,
+        .social-link {
+          margin: 0 0.5rem;
+        }
+      }
+
+      .mobile-menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+      }
+
+      .mobile-menu {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.9);
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .mobile-menu-content {
+        padding: 2rem 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .mobile-btn {
+        width: 100%;
+        margin: 0.5rem 0;
+        padding: 1rem;
+      }
+
+      .mobile-links {
+        margin-top: 1.5rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .mobile-links a {
+        margin: 0.5rem 1rem;
+        color: white;
+        font-size: 1.1rem;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-menu-toggle {
+          display: block;
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+        }
+
+        .header-buttons,
+        .footer-container {
+          display: none;
+        }
+
+        .header-container {
+          justify-content: center;
+        }
+      }
     </style>
   </head>
   <body>
     <header>
       <div class="header-container">
         <div class="logo">cash-stack<span>.com</span></div>
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+          <span class="hamburger-icon">☰</span>
+        </button>
         <div class="header-controls">
           <div class="current-amount">
             <div class="amount-label" id="amount-description">
@@ -777,6 +945,42 @@
         </div>
       </div>
     </header>
+
+    <div class="mobile-menu" id="mobile-menu">
+      <div class="mobile-menu-content">
+        <button class="comparison-btn mobile-btn" id="mobile-comparison-btn">
+          Add Comparison Object
+        </button>
+        <button class="change-amount-btn mobile-btn" id="mobile-amount-btn">
+          Show another amount
+        </button>
+        <button class="share-picture-btn mobile-btn" id="mobile-share-btn">
+          Share Picture
+        </button>
+        <button class="support-btn mobile-btn" id="mobile-support-btn">
+          Support this project
+        </button>
+        <div class="mobile-links">
+          <a href="legal.html" class="legal-link">Legal</a>
+          <a href="mailto:kevreuss@gmail.com" class="legal-link">Feedback?</a>
+          <a
+            href="https://x.com/cash_stack_com"
+            target="_blank"
+            class="social-link"
+          >
+            <svg
+              class="x-logo"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
 
     <main>
       <div id="canvas-container"></div>
@@ -1612,6 +1816,53 @@
           if (teslaCybertruckObject && comparisonBtn) {
             comparisonBtn.textContent = `Edit Comparison`;
           }
+        }
+
+        // Mobile Menu Functionality
+        const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        if (mobileMenuToggle && mobileMenu) {
+          mobileMenuToggle.addEventListener("click", () => {
+            mobileMenu.style.display =
+              mobileMenu.style.display === "block" ? "none" : "block";
+          });
+
+          // Close menu when clicking outside
+          mobileMenu.addEventListener("click", (e) => {
+            if (e.target === mobileMenu) {
+              mobileMenu.style.display = "none";
+            }
+          });
+
+          // Connect mobile buttons to their desktop counterparts
+          document
+            .getElementById("mobile-comparison-btn")
+            ?.addEventListener("click", () => {
+              document.getElementById("comparison-btn").click();
+              mobileMenu.style.display = "none";
+            });
+
+          document
+            .getElementById("mobile-amount-btn")
+            ?.addEventListener("click", () => {
+              document.getElementById("change-amount-btn").click();
+              mobileMenu.style.display = "none";
+            });
+
+          document
+            .getElementById("mobile-share-btn")
+            ?.addEventListener("click", () => {
+              document.getElementById("share-picture-btn").click();
+              mobileMenu.style.display = "none";
+            });
+
+          document
+            .getElementById("mobile-support-btn")
+            ?.addEventListener("click", () => {
+              document.getElementById("support-btn").click();
+              mobileMenu.style.display = "none";
+            });
         }
       });
     </script>
