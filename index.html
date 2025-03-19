@@ -275,8 +275,8 @@
       }
 
       .x-logo {
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         fill: currentColor;
       }
 
@@ -1043,10 +1043,21 @@
         </div>
         <div class="header-buttons">
           <button class="comparison-btn" id="comparison-btn">
-            Show another comparison object
+            Change comparison
           </button>
-          <button class="change-amount-btn" id="change-amount-btn">
-            Show another amount
+          <button class="comparison-btn" id="change-amount-btn">
+            Change amount $
+          </button>
+          <button class="share-picture-btn" id="share-picture-btn">
+            Share Picture
+          </button>
+          <button
+            class="support-btn coffee-btn"
+            id="support-btn"
+            style="margin-left: 1rem"
+          >
+            <span class="coffee-icon">☕</span>
+            Support this project
           </button>
         </div>
       </div>
@@ -1055,10 +1066,10 @@
     <div class="mobile-menu" id="mobile-menu">
       <div class="mobile-menu-content">
         <button class="comparison-btn mobile-btn" id="mobile-comparison-btn">
-          Show another comparison object
+          Change comparison
         </button>
         <button class="comparison-btn mobile-btn" id="mobile-amount-btn">
-          Show another amount
+          Change amount $
         </button>
         <button class="share-picture-btn mobile-btn" id="mobile-share-btn">
           Share Picture
@@ -1103,21 +1114,6 @@
     <footer>
       <div class="footer-container">
         <div class="footer-left">
-          <button
-            class="support-btn coffee-btn"
-            id="support-btn"
-            style="margin-left: 1rem"
-          >
-            <span class="coffee-icon">☕</span>
-            Support this project
-          </button>
-        </div>
-        <div class="footer-center">
-          <button class="share-picture-btn" id="share-picture-btn">
-            Share Picture
-          </button>
-        </div>
-        <div class="footer-right">
           <a href="legal.html" class="legal-link">Legal</a>
           <a
             href="mailto:kevreuss@gmail.com"
@@ -1125,6 +1121,9 @@
             style="margin-left: 1rem"
             >Feedback?</a
           >
+        </div>
+        <div class="footer-center"></div>
+        <div class="footer-right">
           <a
             href="https://x.com/cash_stack_com"
             target="_blank"
@@ -1862,7 +1861,7 @@
               const selectedObject = comparisonObjects.find(
                 (obj) => obj.id === currentComparisonId
               );
-              comparisonBtn.textContent = `Edit Comparison`;
+              comparisonBtn.textContent = `Change Comparison`;
             }
 
             // First ensure bills are rendered, then add comparison object
@@ -1996,7 +1995,7 @@
             (obj) => obj.id === "rubber-duck"
           );
           if (teslaCybertruckObject && comparisonBtn) {
-            comparisonBtn.textContent = `Edit Comparison`;
+            comparisonBtn.textContent = `Change Comparison`;
           }
         }
 
