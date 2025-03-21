@@ -147,7 +147,7 @@ const app = {
     // Repeat the texture to make it look more realistic
     grassTexture.wrapS = THREE.RepeatWrapping;
     grassTexture.wrapT = THREE.RepeatWrapping;
-    grassTexture.repeat.set(300, 300); // More repeats for the much larger plane
+    grassTexture.repeat.set(3000, 3000); // More repeats for the much larger plane
 
     const groundMaterial = new THREE.MeshStandardMaterial({
       map: grassTexture,
