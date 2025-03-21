@@ -126,7 +126,7 @@ const app = {
   // Set up ground plane
   setupGround() {
     // Three.js ground - much larger (5000x5000 instead of 500x500)
-    const groundGeometry = new THREE.PlaneGeometry(5000, 5000);
+    const groundGeometry = new THREE.PlaneGeometry(50000, 50000);
 
     // Load grass texture
     const textureLoader = new THREE.TextureLoader();
