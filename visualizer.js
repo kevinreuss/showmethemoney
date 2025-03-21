@@ -314,7 +314,7 @@ const app = {
 
     // Round to nearest $100
     amount = Math.round(amount / 100) * 100;
-    amount = Math.min(amount, 500000000000);
+    // amount = Math.min(amount, 500000000000); // dont limit the amount
 
     // Calculate number of bills
     const numBills = amount / 100;
