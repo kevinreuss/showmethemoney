@@ -58,7 +58,7 @@ const app = {
       75,
       window.innerWidth / window.innerHeight,
       0.1,
-      5000
+      500000
     );
     this.camera.position.set(0, 10, 20);
 
